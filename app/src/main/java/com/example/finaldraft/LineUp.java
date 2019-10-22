@@ -2,7 +2,9 @@ package com.example.finaldraft;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -12,6 +14,7 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.finaldraft.model.Player;
 
@@ -21,10 +24,13 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 public class LineUp extends StartingWindow {
+    public static final String RESULT_KEY_MESSAGE = "com.example.finaldraft.LineUp - Return Message";
     Button btnBack;
     Button btnContinue;
     Button btnAdd;
     Button btnCreate;
+
+    Spinner spnStart;
 
     TextView lblError;
 
@@ -62,6 +68,7 @@ public class LineUp extends StartingWindow {
         btnAdd = (Button) findViewById(R.id.btnAdd);
         btnCreate = (Button) findViewById(R.id.btnCreate);
         tblLineUp = (TableLayout) findViewById(R.id.tblLineUp);
+        spnStart = (Spinner) findViewById(R.id.spnStart);
         //event listeners
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,6 +79,7 @@ public class LineUp extends StartingWindow {
         btnContinue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                startGame();
 
             }
         });
@@ -87,7 +95,92 @@ public class LineUp extends StartingWindow {
                 openPlayerInfo(false,null,null,null,null);
             }
         });
+        printRoster("LINEUP");
+        /*
+        spnStart.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+            }
+        });*/
+
+
+    }
+
+    public static boolean[] getResultKeyMessage(Intent intent){
+        System.out.println("Getresultkeymessage called");
+        return intent.getBooleanArrayExtra(RESULT_KEY_MESSAGE);
+    }
+
+    private void startGame(){
+        if (spnStart.getSelectedItem().toString().equals("--")){
+            Toast toast=Toast.makeText(getApplicationContext(),"Select Home or Away",Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.getView().setBackgroundResource(R.drawable.error_message);
+
+            TextView textView = (TextView) toast.getView().findViewById(android.R.id.message);
+            textView.setTextColor(Color.WHITE);
+            textView.setTextSize(20);
+            toast.show();
+        }else if (count == 9){
+            Intent i = new Intent();
+            boolean start = false;
+            if (spnStart.getSelectedItem().toString().equals("Home")){
+                start = true;
+            }
+            createLineUp();
+
+            i.putExtra(RESULT_KEY_MESSAGE,new boolean[]{start});
+            printRoster("Lineup end");
+            setResult(Activity.RESULT_OK,i);
+            finish();
+
+        } else if (count < 9){
+            Toast toast=Toast.makeText(getApplicationContext(),"Not Enough Players!",Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.getView().setBackgroundResource(R.drawable.error_message);
+
+            TextView textView = (TextView) toast.getView().findViewById(android.R.id.message);
+            textView.setTextColor(Color.WHITE);
+            textView.setTextSize(20);
+            toast.show();
+        }
+    }
+
+    private int getLength(){
+        RosterNode tmp = getRoster();
+        int count = 1;
+        while (tmp.next != null){
+            tmp = tmp.next;
+            count++;
+        }
+        return count;
+    }
+
+    private void createLineUp(){
+        PlayerNode[] lineUpTmp = new PlayerNode[9];
+        for (int i = 0; i < lineUpTmp.length; i++) {
+            RosterNode tmp = getRoster();
+            System.out.println("THIS IS HEAD: " + tmp.data.getFirstName() + " " + tmp.data.getLastName() + " ORDER:" + tmp.order);
+            while (tmp.order != i + 1) {
+                System.out.println("THIS IS TMP BEFORE: " + tmp.data.getFirstName() + " " + tmp.data.getLastName() + " ORDER:" + tmp.order);
+                tmp = tmp.next;
+                System.out.println("THIS IS TMP AFTER: " + tmp.data.getFirstName() + " " + tmp.data.getLastName() + " ORDER:" + tmp.order);
+            }
+            System.out.println("THE ORDER OF: " + tmp.data.getFirstName() + ": " + tmp.order + " IS EQUAL TO " + (i+1));
+            PlayerNode tmp1 = new PlayerNode();
+            tmp1.data = tmp.data;
+            tmp1.order = tmp.order;
+            tmp1.position = tmp.position;
+            lineUpTmp[i] = tmp1;
+        }
+        setStarter(lineUpTmp[0]);
+        PlayerNode tmp = getStarter();
+        for (int i = 1; i < 9; i++) {
+            tmp.next = lineUpTmp[i];
+            tmp = tmp.next;
+        }
+        printRoster("CREATELINEUP");
     }
 
     private void openRoster(){
@@ -106,7 +199,7 @@ public class LineUp extends StartingWindow {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        //super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case (REQUEST_CODE_GETMESSAGE_PLAYERINFO):
                 if (resultCode == Activity.RESULT_OK){
@@ -118,7 +211,7 @@ public class LineUp extends StartingWindow {
                     realm.beginTransaction();
                     realm.insert(player);
                     realm.commitTransaction();
-                    PlayerNode newNode = new PlayerNode();
+                    RosterNode newNode = new RosterNode();
                     newNode.data = player;
                     newNode.isChecked = true;
                     RosterCount++;
@@ -139,7 +232,7 @@ public class LineUp extends StartingWindow {
         tblLineUp.removeAllViews();
         count = 0;
         addTableRow(head);
-        PlayerNode tmp = getRoster();
+        RosterNode tmp = getRoster();
         if (tmp.isChecked){
             String[] msg = {tmp.data.getFirstName(), tmp.data.getLastName(), tmp.data.getPlayerNumber()};
             int[] ids = {order_id + count, first_id + count, last_id + count, number_id + count, pos_id + count, remove_id + count};
@@ -233,7 +326,7 @@ public class LineUp extends StartingWindow {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
                 int ref = parent.getId()-order_id;
-                PlayerNode tmp = StartingWindow.getRoster();
+                RosterNode tmp = StartingWindow.getRoster();
                 for (int i = 0; i <ref ; i ++){
                     tmp = tmp.next;
                 }
@@ -241,7 +334,7 @@ public class LineUp extends StartingWindow {
                 tmp.order = Integer.valueOf(spnIndex.getItemAtPosition(position).toString());
 
                 //switching
-                PlayerNode tmp2 = StartingWindow.getRoster();
+                RosterNode tmp2 = StartingWindow.getRoster();
                 updateSpnIndexRef();
                 int index = 0;
                 if (tmp2.order == Integer.parseInt(spnIndex.getItemAtPosition(position).toString()) &&
@@ -287,7 +380,7 @@ public class LineUp extends StartingWindow {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 int ref = parent.getId()-pos_id;
-                PlayerNode tmp = StartingWindow.getRoster();
+                RosterNode tmp = StartingWindow.getRoster();
                 for (int i = 0; i <ref ; i ++){
                     tmp = tmp.next;
 
@@ -295,7 +388,7 @@ public class LineUp extends StartingWindow {
                 System.out.println(spnPos.getItemAtPosition(position).toString()+ " IS THE POSITION FOR: "+ tmp.data.getFirstName());
                 tmp.position = spnPos.getItemAtPosition(position).toString();
                 System.out.println(tmp.position);
-                PlayerNode tmp2 = getRoster();
+                RosterNode tmp2 = getRoster();
                 updateSpnPosRef();
 
                 int index = 0;
@@ -348,7 +441,7 @@ public class LineUp extends StartingWindow {
         for (int i = 0; i < 9; i++){
             spnIndexRef[i] = false;
         }
-        PlayerNode tmp = getRoster();
+        RosterNode tmp = getRoster();
         if (tmp.isChecked) {
             spnIndexRef[tmp.order-1] = true;
         }
@@ -369,7 +462,7 @@ public class LineUp extends StartingWindow {
         for (int i = 0; i < 9; i++){
             spnPosRef[i] = false;
         }
-        PlayerNode tmp = getRoster();
+        RosterNode tmp = getRoster();
         for (int i = 0; i < positions.length;i++){
             if (tmp.isChecked && tmp.position.equals(positions[i])){
                 spnPosRef[i] = true;
@@ -392,7 +485,23 @@ public class LineUp extends StartingWindow {
     //Nodes
     private void removePlayerNode(View view){
         int ref = view.getId()-remove_id;
-        PlayerNode tmp = getStarter();
+        int removeCount = 0;
+        RosterNode tmp = getRoster();
+        if (tmp.isChecked){
+            if (removeCount == ref) {
+                tmp.isChecked = false;
+            }
+            removeCount++;
+        }
+        while (tmp.next != null){
+            if (tmp.next.isChecked){
+                if (removeCount == ref) {
+                    tmp.next.isChecked = false;
+                }
+                removeCount++;
+            }
+            tmp = tmp.next;
+        }
     }
 
     private String totString(boolean[] array){

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">FinalDraft</string>
+    <string name="prompt">Home or Away?</string>
+
+    <string-array name="option_arrays">
+        <item>--</item>
+        <item>Home</item>
+        <item>Away</item>
+    </string-array>
 </resources>

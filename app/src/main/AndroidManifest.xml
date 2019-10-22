@@ -38,6 +38,26 @@
             android:theme="@style/AppTheme.NewActivity"
             android:screenOrientation="landscape">
         </activity>
+        <activity android:name=".GameActivity"
+            android:theme="@style/AppTheme.NewActivity"
+            android:screenOrientation="landscape">
+        </activity>
+        <activity android:name=".Pitch"
+            android:theme="@style/AppTheme.NewActivity"
+            android:screenOrientation="landscape">
+        </activity>
+        <activity android:name=".BallInPlay"
+            android:theme="@style/AppTheme.NewActivity"
+            android:screenOrientation="landscape">
+        </activity>
+        <activity android:name=".BallInPlay2"
+            android:theme="@style/AppTheme.NewActivity"
+            android:screenOrientation="landscape">
+        </activity>
+        <activity android:name=".SubPlayer"
+            android:theme="@style/AppTheme.NewActivity"
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>

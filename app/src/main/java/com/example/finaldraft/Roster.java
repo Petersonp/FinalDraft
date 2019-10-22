@@ -162,7 +162,7 @@ public class Roster extends StartingWindow {
         loadTable();
     }
     private void removePlayerNode(View view){
-        PlayerNode tmp = getRoster();
+        RosterNode tmp = getRoster();
         int ref = view.getId()-remove_id;
         TextView tmpFirst = (TextView) findViewById(ref+first_id);
         TextView tmpLast = (TextView) findViewById(ref+last_id);
@@ -195,13 +195,13 @@ public class Roster extends StartingWindow {
     }
 
     private void addPlayerNode(Player player, int index){
-        PlayerNode newPlayer = new PlayerNode();
+        RosterNode newPlayer = new RosterNode();
         newPlayer.data = player;
         newPlayer.index = index;
         if (getRoster() == null){
             setRoster(newPlayer);
         }else{
-            PlayerNode tmp = getRoster();
+            RosterNode tmp = getRoster();
             while(tmp.next != null){
                 tmp = tmp.next;
             }
@@ -211,7 +211,7 @@ public class Roster extends StartingWindow {
     }
 
     private void editPlayerNode(Player player, int index){
-        PlayerNode tmp = getRoster();
+        RosterNode tmp = getRoster();
         if (tmp.index == index){
             tmp.data = player;
         }else{

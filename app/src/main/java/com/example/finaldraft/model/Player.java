@@ -64,8 +64,8 @@ public class Player extends RealmObject {
     }
     public String getK() { return String.valueOf(K); }
     public void setK(int K) { this.K = K; }
-    public void addTB() {
-        setTB(TB + 1);
+    public void addTB(int i) {
+        setTB(TB + i);
     }
     public String getTB() { return String.valueOf(TB); }
     public void setTB(int TB) { this.TB = TB; }
@@ -279,11 +279,11 @@ public class Player extends RealmObject {
         return String.valueOf((double)(SA/SS));
     }
 
-    public String[] getPitchingStats(){
-        return (new String[] {getFirstName(),getBA(),getOBP(),getBBK(),getOPS()});
-    }
     public String[] getBattingStats(){
-        return (new String[] {getFirstName(),getBABIP(),getGF(),getKBB(),getCP()});
+        return (new String[] {getFirstName(),getBA(),getOBP(),getOPS(),getBBK(),getBB(),getK()});
+    }
+    public String[] getPitchingStats(){
+        return (new String[] {getFirstName(),getBABIP(),getGF(),getPIT(),getK(),getKBB(),getSP(),getCP()});
     }
     public String[] getRunningStats() {
         return (new String[]{getFirstName(), getRSP(), getSA(), getSS()});

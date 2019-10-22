@@ -1,6 +1,8 @@
 package com.example.finaldraft;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -16,6 +18,7 @@ public class StartingWindow extends AppCompatActivity {
     public static final int REQUEST_CODE_GETMESSAGE_LINEUP = 0;
     public static final int REQUEST_CODE_GETMESSAGE_ROSTER = 1;
     public static final int REQUEST_CODE_GETMESSAGE_STATS = 2;
+    public static final int REQUEST_CODE_GETMESSAGE_GAMEACTIVITY = 20;
 
     //starts at 1
     public int RosterCount = 0;
@@ -23,6 +26,8 @@ public class StartingWindow extends AppCompatActivity {
     Button btnNewGame;
     Button btnRoster;
     Button btnStats;
+
+    static boolean first = true;
 
     private static Realm realm1;
 
@@ -44,12 +49,12 @@ public class StartingWindow extends AppCompatActivity {
         StartingWindow.starter = starter;
     }
 
-    private static PlayerNode roster;
-    public static PlayerNode getRoster() {
+    private static RosterNode roster;
+    public static RosterNode getRoster() {
         return roster;
     }
 
-    public static void setRoster(PlayerNode roster) {
+    public static void setRoster(RosterNode roster) {
         StartingWindow.roster = roster;
     }
 
@@ -101,7 +106,10 @@ public class StartingWindow extends AppCompatActivity {
                 openActivity(Stats.class,REQUEST_CODE_GETMESSAGE_STATS);
             }
         });
-        createRoster();
+        if (first == true) {
+            createRoster();
+            first = false;
+        }
         // Realm database
         /*
         Realm.init(this);
@@ -116,15 +124,34 @@ public class StartingWindow extends AppCompatActivity {
 
     }
 
+    public static void printLineUp(String location){
+        PlayerNode tmp = getStarter();
+        if (tmp != null) {
+            System.out.println("<-----Player-----> Order: " + tmp.order+" @"+location);
+            System.out.println("First Name: " + tmp.data.getFirstName());
+            System.out.println("Last Name: " + tmp.data.getLastName());
+            System.out.println("Player Number: " + tmp.data.getPlayerNumber());
+            System.out.println("<---------------->");
+            while (tmp.next != null) {
+                System.out.println("<-----Player-----> Order: " + tmp.next.order+" @"+location);
+                System.out.println("First Name: " + tmp.next.data.getFirstName());
+                System.out.println("Last Name: " + tmp.next.data.getLastName());
+                System.out.println("Player Number: " + tmp.next.data.getPlayerNumber());
+                System.out.println("<---------------->");
+                tmp = tmp.next;
+            }
+        }else{
+            System.out.println("Roster is Null");
+        }
+    }
     public static void printRoster(String location){
-        PlayerNode tmp = getRoster();
+        RosterNode tmp = getRoster();
         if (tmp != null) {
             System.out.println("<-----Player-----> Index: " + tmp.index+" @"+location);
             System.out.println("First Name: " + tmp.data.getFirstName());
             System.out.println("Last Name: " + tmp.data.getLastName());
             System.out.println("Player Number: " + tmp.data.getPlayerNumber());
             System.out.println("IsChecked: "+tmp.isChecked);
-            System.out.println("tmpbool: "+tmp.tmpBool);
             System.out.println("<---------------->");
             while (tmp.next != null) {
                 System.out.println("<-----Player-----> Index: " + tmp.next.index+" @"+location);
@@ -132,7 +159,6 @@ public class StartingWindow extends AppCompatActivity {
                 System.out.println("Last Name: " + tmp.next.data.getLastName());
                 System.out.println("Player Number: " + tmp.next.data.getPlayerNumber());
                 System.out.println("IsChecked: "+tmp.next.isChecked);
-                System.out.println("tmpbool: "+tmp.next.tmpBool);
                 System.out.println("<---------------->");
                 tmp = tmp.next;
             }
@@ -149,9 +175,9 @@ public class StartingWindow extends AppCompatActivity {
     public void createRoster(){
         boolean first = true;
         final RealmResults<Player> results = getRealm().where(Player.class).findAll();
-        PlayerNode tmp = new PlayerNode();
+        RosterNode tmp = new RosterNode();
         for (Player player : results) {
-            PlayerNode newNode = new PlayerNode();
+            RosterNode newNode = new RosterNode();
             newNode.data = player;
             RosterCount++;
             newNode.index = RosterCount;
@@ -164,6 +190,22 @@ public class StartingWindow extends AppCompatActivity {
             tmp = newNode;
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            case (REQUEST_CODE_GETMESSAGE_LINEUP):
+                if (resultCode == Activity.RESULT_OK) {
+                    Intent i = new Intent(getApplicationContext(), GameActivity.class);
+                    Bundle b = new Bundle();
+                    b.putBooleanArray("start", LineUp.getResultKeyMessage(data));
+                    i.putExtras(b);
+                    startActivity(i);
+                }
+                break;
+        }
     }
 }
 

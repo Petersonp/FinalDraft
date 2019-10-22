@@ -78,7 +78,7 @@ public class AddFromRoster extends Activity {
 
     private boolean ninePlayers(){
         int count = 0;
-        PlayerNode tmp = StartingWindow.getRoster();
+        RosterNode tmp = StartingWindow.getRoster();
         System.out.println(tmp.data.getFirstName()+": "+tmp.isChecked);
         if (tmp.isChecked){
             count++;
@@ -97,7 +97,7 @@ public class AddFromRoster extends Activity {
         StartingWindow.printRoster("LOADTABLE");
         tblRoster.removeAllViews();
         count=0;
-        PlayerNode tmp = StartingWindow.getRoster();
+        RosterNode tmp = StartingWindow.getRoster();
         String[] header = {"No.","First Name","Last Name","#","Select"};
         addTableRow(header);
         final RealmResults<Player> results = realm.where(Player.class).findAll();
@@ -171,7 +171,7 @@ public class AddFromRoster extends Activity {
     }
 
     protected void addPlayer(int ref, boolean isChecked){
-        PlayerNode tmp = StartingWindow.getRoster();
+        RosterNode tmp = StartingWindow.getRoster();
         TextView lblFirst = (TextView) findViewById(first_id+ref);
         TextView lblLast = (TextView) findViewById(last_id+ref);
         TextView lblNo = (TextView) findViewById(number_id+ref);
@@ -181,7 +181,6 @@ public class AddFromRoster extends Activity {
         }
         System.out.println("Chosen player is: "+tmp.data.getFirstName());
         tmp.isChecked = isChecked;
-        tmp.tmpBool = true;
         System.out.println(tmp.data.getFirstName()+".isChecked = "+String.valueOf(tmp.isChecked));
 
     }

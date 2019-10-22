@@ -72,18 +72,18 @@ public class Stats extends StartingWindow {
         final RealmResults<Player> results = realm.where(Player.class).findAll();
         tblStats.removeAllViews();
         switch (statsType){
-            case (PITCHING_STATS):
-                String[] BHeaders = {"Batter Name","BA","OBP","BBK","OPS"};
+            case (BATTING_STATS):
+                String[] BHeaders = {"Batter Name","BA","OBP","OPS","BBK","BB","K"};
                 addStatRows(BHeaders);
                 for (Player player: results){
-                    addStatRows(player.getPitchingStats());
+                    addStatRows(player.getBattingStats());
                 }
                 break;
-            case (BATTING_STATS):
-                String[] PHeaders = {"Pitcher Name","BABIP","GF","KBB","CP"};
+            case (PITCHING_STATS):
+                String[] PHeaders = {"Pitcher Name","BABIP","GF","PIT","K","KBB","SP","CP"};
                 addStatRows(PHeaders);
                 for (Player player: results){
-                    addStatRows(player.getBattingStats());
+                    addStatRows(player.getPitchingStats());
                 }
                 break;
             case (RUNNING_STATS):

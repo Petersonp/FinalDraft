@@ -289,5 +289,9 @@ public class Player extends RealmObject {
         return (new String[]{getFirstName(), getRSP(), getSA(), getSS()});
     }
 
+    public String[] getRawStats(){
+        return (new String[]{getHits(),getAB(),getBB(),getHBP(),getK(),getFB(),getSF(),getBH(),getBHR(),getBAB(),getBK(),getBSF(),getGB(),getPIT(),getFB(),getBBP(),getS(),getC(),getSS(),getSA()});
+    }
+
 
 }

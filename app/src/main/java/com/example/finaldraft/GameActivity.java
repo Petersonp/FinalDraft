@@ -81,6 +81,9 @@ public class GameActivity extends StartingWindow {
         return opponent;
     }
 
+    Game front;
+    Game base;
+
     public void setOpponent(PlayerNode opponent) {
         this.opponent = opponent;
     }
@@ -143,7 +146,7 @@ public class GameActivity extends StartingWindow {
         btnUndo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                pop();
             }
         });
         btnStats.setOnClickListener(new View.OnClickListener() {
@@ -233,8 +236,276 @@ public class GameActivity extends StartingWindow {
         updateGameInfo();
         printRoster("GameActivity");
         printLineUp("GameActivity");
+        push();
 
 
+    }
+
+    private void push(){
+        Game game = newGame();
+        if(front == null){
+            front = game;
+            base = game;
+        }
+        else{
+            if(isEmpty()){
+                base.next = game;
+                game.back = base;
+            }
+            game.back = front;
+            front.next = game;
+            front = game;
+        }
+
+    }
+
+    private void pop(){
+        Game g;
+        if (!isEmpty()){
+            g = front;
+            front = front.back;
+        }else{
+            g = front;
+        }
+        setGame(g);
+    }
+
+    private void setGame(Game g){
+        //Lineup
+        PlayerNode tmp = g.LineUp[0];
+        for (int i =0; i< 9;i++){
+            if (i == 0){
+                tmp = g.LineUp[i];
+                //tmp.data = g.Players[i];
+                setStarter(tmp);
+                tmp = getStarter();
+            }else{
+                PlayerNode newPlayer = g.LineUp[i];
+                //newPlayer.data = g.Players[i];
+                tmp.next = newPlayer;
+                tmp = tmp.next;
+            }
+        }
+        System.out.println("THIS IS IN SETGAME: "+getStarter().data.getFirstName());
+
+        //Roster
+        RosterNode rosterTmp = g.roster[0];
+        for (int i =0; i<g.roster.length;i++){
+            if (i==0){
+                rosterTmp = g.roster[i];
+                setRoster(rosterTmp);
+                rosterTmp = getRoster();
+                rosterTmp.data = g.players[i];
+            }else{
+                RosterNode newRoster = g.roster[i];
+                rosterTmp.next = newRoster;
+                newRoster.data = g.players[i];
+                rosterTmp = rosterTmp.next;
+            }
+        }
+
+        RosterNode tmpRoster= getRoster();
+        for (int i =0; i<g.stats.length;i++){
+            Player tmpPlayer = tmpRoster.data;
+            getRealm().beginTransaction();
+            tmpPlayer.setHits(Integer.parseInt(g.stats[i][0]));
+            tmpPlayer.setAB(Integer.parseInt(g.stats[i][1]));
+            tmpPlayer.setBB(Integer.parseInt(g.stats[i][2]));
+            tmpPlayer.setHBP(Integer.parseInt(g.stats[i][3]));
+            tmpPlayer.setK(Integer.parseInt(g.stats[i][4]));
+            tmpPlayer.setTB(Integer.parseInt(g.stats[i][5]));
+            tmpPlayer.setSF(Integer.parseInt(g.stats[i][6]));
+            tmpPlayer.setBH(Integer.parseInt(g.stats[i][7]));
+            tmpPlayer.setBHR(Integer.parseInt(g.stats[i][8]));
+            tmpPlayer.setBAB(Integer.parseInt(g.stats[i][9]));
+            tmpPlayer.setBK(Integer.parseInt(g.stats[i][10]));
+            tmpPlayer.setBSF(Integer.parseInt(g.stats[i][11]));
+            tmpPlayer.setGB(Integer.parseInt(g.stats[i][12]));
+            tmpPlayer.setPIT(Integer.parseInt(g.stats[i][13]));
+            tmpPlayer.setFB(Integer.parseInt(g.stats[i][14]));
+            tmpPlayer.setBBP(Integer.parseInt(g.stats[i][15]));
+            tmpPlayer.setS(Integer.parseInt(g.stats[i][16]));
+            tmpPlayer.setC(Integer.parseInt(g.stats[i][17]));
+            tmpPlayer.setSS(Integer.parseInt(g.stats[i][18]));
+            tmpPlayer.setSA(Integer.parseInt(g.stats[i][19]));
+            getRealm().commitTransaction();
+            tmpRoster = tmpRoster.next;
+        }
+
+
+        //Batters/RUnners
+        isHome = g.isHome;
+        PlayerNode tmp1;
+        if (isHome){
+            tmp1 = getStarter();
+            loadFieldingPosition(getOpponent());
+        }else{
+            tmp1 = getOpponent();
+            loadFieldingPosition(getStarter());
+        }
+        //atbat
+        PlayerNode atBatTmp = getStarter();
+        for (int i =0; i<g.atBat;i++){
+            atBatTmp = atBatTmp.next;
+        }
+        atBat = atBatTmp;
+        //oatbat
+        PlayerNode oatBatTmp = getOpponent();
+        for (int i =0; i<g.oatBat;i++){
+            oatBatTmp = oatBatTmp.next;
+        }
+        oatBat = oatBatTmp;
+        //batter
+        PlayerNode batterTmp = tmp1;
+        for (int i =0; i<g.batter;i++){
+            batterTmp =batterTmp.next;
+        }
+        batter.data = batterTmp;
+        //fbrunner
+        if (g.fbRunner!=10) {
+            PlayerNode fbRunnerTmp = tmp1;
+            for (int i = 0; i < g.fbRunner; i++) {
+                fbRunnerTmp = fbRunnerTmp.next;
+            }
+            fbRunner.data = fbRunnerTmp;
+        }else{
+            fbRunner.data = null;
+        }
+        //sbrunner
+        if (g.sbRunner != 10) {
+            PlayerNode sbRunnerTmp = tmp1;
+            for (int i = 0; i < g.sbRunner; i++) {
+                sbRunnerTmp = sbRunnerTmp.next;
+            }
+            sbRunner.data = sbRunnerTmp;
+        }else{
+            sbRunner.data = null;
+        }
+        //tbrunner
+        if (g.tbRunner != 10) {
+            PlayerNode tbRunnerTmp = tmp1;
+            for (int i = 0; i < g.tbRunner; i++) {
+                tbRunnerTmp = tbRunnerTmp.next;
+            }
+            tbRunner.data = tbRunnerTmp;
+        }else{
+            tbRunner.data = null;
+        }
+
+        //Game info
+        strikes = g.strikes;
+        balls = g.balls;
+        inning = g.inning;
+        outs = g.outs;
+
+        updateGameInfo();
+        loadBattingButtons();
+
+
+
+    }
+
+    protected boolean isEmpty(){
+        return (base.next == null);
+    }
+
+    private int getRosterLength(){
+        int count = 1;
+        RosterNode tmp = getRoster();
+        while (tmp.next != null){
+            count++;
+            tmp = tmp.next;
+        }
+        return count;
+    }
+
+    private Game newGame(){
+        Game game = new Game();
+        PlayerNode[] lineup = new PlayerNode[9];
+        PlayerNode tmp = getStarter();
+        for (int i = 0; i<9;i++){
+            lineup[i] = tmp;
+            tmp = tmp.next;
+        }
+        game.LineUp = lineup;
+        RosterNode[] rosterNodes = new RosterNode[getRosterLength()];
+        Player[] players = new Player[getRosterLength()];
+        RosterNode tmp1 = getRoster();
+        for (int j = 0; j<rosterNodes.length;j++){
+            rosterNodes[j] = tmp1;
+            Player newPlayer = tmp1.data;
+            players[j] = newPlayer;
+            System.out.println(newPlayer.getPIT()+" "+j);
+            tmp1 = tmp1.next;
+        }
+        game.roster = rosterNodes;
+        game.players = players;
+
+        //stats
+        RosterNode tmpRoster = getRoster();
+        String[][] stats = new String[getRosterLength()][20];
+        for (int i = 0; i< getRosterLength();i++){
+            stats[i] = tmpRoster.data.getRawStats();
+            tmpRoster =tmpRoster.next;
+
+        }
+        game.stats = stats;
+
+
+
+        //game.Players = players;
+        game.strikes = strikes;
+        game.outs = outs;
+        game.inning = inning;
+        game.balls = balls;
+        game.isHome = isHome;
+
+        game.atBat = getInt(atBat);
+        game.oatBat = getoInt(oatBat);
+        game.batter = getInt(batter.data);
+        if (fbRunner.data != null) {
+            game.fbRunner = getInt(fbRunner.data);
+        }else{
+            game.fbRunner = 10;
+        }
+        if (sbRunner.data != null) {
+            game.sbRunner = getInt(sbRunner.data);
+        }else{
+            game.sbRunner = 10;
+        }
+        if (tbRunner.data != null) {
+            game.tbRunner = getInt(tbRunner.data);
+        }else{
+            game.tbRunner = 10;
+        }
+        return game;
+    }
+
+    private int getInt(PlayerNode playerNode){
+        System.out.println("Running GetInt");
+        PlayerNode tmp;
+        if (playerNode.data.getFirstName().equals("Opponent")){
+            tmp = getOpponent();
+        }else {
+            tmp = getStarter();
+        }
+        int count = 0;
+        while (!(tmp.data.getFirstName().equals(playerNode.data.getFirstName())&&tmp.data.getLastName().equals(playerNode.data.getLastName())&&tmp.data.getPlayerNumber().equals(playerNode.data.getPlayerNumber()))){
+            System.out.println("Comparing: "+tmp.data.getFirstName()+" "+tmp.data.getLastName()+" #"+tmp.data.getPlayerNumber()+" To: "+playerNode.data.getFirstName()+"po "+playerNode.data.getLastName()+" #"+playerNode.data.getPlayerNumber());
+            count++;
+            tmp = tmp.next;
+        }
+        return count;
+    }
+
+    private int getoInt(PlayerNode playerNode){
+        PlayerNode tmp = getOpponent();
+        int count = 0;
+        while (!(tmp.data.getFirstName().equals(playerNode.data.getFirstName())&&tmp.data.getLastName().equals(playerNode.data.getLastName())&&tmp.data.getPlayerNumber().equals(playerNode.data.getPlayerNumber()))){
+            count++;
+            tmp = tmp.next;
+        }
+        return count;
     }
 
     private void substituteActivity(PlayerNode player){
@@ -366,8 +637,8 @@ public class GameActivity extends StartingWindow {
         for (int i = 0; i <9;i++){
             PlayerNode newPlayer = new PlayerNode();
             Player player = new Player();
-            player.setFirstName("Opponent"+String.valueOf(i+1));
-            player.setLastName(" ");
+            player.setFirstName("Opponent");
+            player.setLastName(String.valueOf(i+1));
             player.setPlayerNumber(String.valueOf(i+1));
             newPlayer.data = player;
             newPlayer.order = i+1;
@@ -389,171 +660,175 @@ public class GameActivity extends StartingWindow {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case (REQUEST_CODE_GETMESSAGE_PITCH):
-                String[] result = Pitch.getResultKeyMessage(data);
-                System.out.println(result[0]+" IS RESULT[0]");
-                System.out.println(result[1]+" IS RESULT[1]");
-                System.out.println(pitcher.data.getFirstName()+" "+pitcher.data.getLastName()+" IS THE PITCHER ----------------------");
-                getRealm().beginTransaction();
-                pitcher.data.addPIT();
-                getRealm().commitTransaction();
-                switch (result[1]){
-                    case ("Ground Ball"):
-                        System.out.println("GROUND BALL IS THE RESULT");
-                        getRealm().beginTransaction();
-                        pitcher.data.addC();
-                        pitcher.data.addGB();
-                        getRealm().commitTransaction();
-                        break;
-                    case ("Line Drive"):
-                        System.out.println("LINE DRIVE IS THE RESULT");
-                        getRealm().beginTransaction();
-                        pitcher.data.addC();
-                        getRealm().commitTransaction();
-                        break;
-                    case ("Pop Fly"):
-                        System.out.println("POP FLY IS THE RESULT");
-                        getRealm().beginTransaction();
-                        pitcher.data.addFB();
-                        pitcher.data.addC();
-                        pitcher.data.addBSF();
-                        batter.data.data.addSF();
-                        getRealm().commitTransaction();
-                        break;
-                    case ("Bunt"):
-                        System.out.println("BUNT IS THE RESULT");
-                        getRealm().beginTransaction();
-                        pitcher.data.addC();
-                        getRealm().commitTransaction();
-                        break;
-                }
-                switch (result[0]){
-                    case ("Out"):
-                        System.out.println("OUT IS THE RESULT");
-                        getRealm().beginTransaction();
-                        pitcher.data.addS();
-                        getRealm().commitTransaction();
-                        outs++;
-                        break;
-                    case ("Single"):
-                        System.out.println("SINGLE IS THE RESULT");
-                        strikes = 0;
-                        balls = 0;
-                        getRealm().beginTransaction();
-                        batter.data.data.addHits();
-                        batter.data.data.addTB(1);
-                        pitcher.data.addBHR();
-                        pitcher.data.addBH();
-                        pitcher.data.addS();
-                        getRealm().commitTransaction();
-                        moveBatter(1);
-                        break;
-                    case ("Double"):
-                        System.out.println("DOUBLE IS THE RESULT");
-                        strikes = 0;
-                        balls = 0;
-                        getRealm().beginTransaction();
-                        batter.data.data.addHits();
-                        batter.data.data.addTB(2);
-                        pitcher.data.addBHR();
-                        pitcher.data.addBH();
-                        pitcher.data.addS();
-                        getRealm().commitTransaction();
-                        moveBatter(2);
-                        break;
-                    case ("Triple"):
-                        System.out.println("TRIPLE IS THE RESULT");
-                        strikes = 0;
-                        balls = 0;
-                        getRealm().beginTransaction();
-                        batter.data.data.addHits();
-                        batter.data.data.addTB(3);
-                        pitcher.data.addBHR();
-                        pitcher.data.addBH();
-                        pitcher.data.addS();
-                        getRealm().commitTransaction();
-                        moveBatter(3);
-                        break;
-                    case ("In-The-Park Home Run"):
-                        System.out.println("IN THE PARK HOME RUN IS THE RESULT");
-                        strikes = 0;
-                        balls = 0;
-                        getRealm().beginTransaction();
-                        batter.data.data.addHits();
-                        batter.data.data.addTB(4);
-                        pitcher.data.addBHR();
-                        pitcher.data.addBH();
-                        pitcher.data.addS();
-                        getRealm().commitTransaction();
-                        moveBatter(4);
-                        break;
-                    case ("Home Run"):
-                        System.out.println("HOME RUN IS THE RESULT");
-                        strikes = 0;
-                        balls = 0;
-                        getRealm().beginTransaction();
-                        batter.data.data.addHits();
-                        batter.data.data.addTB(4);
-                        pitcher.data.addBHR();
-                        pitcher.data.addBH();
-                        pitcher.data.addS();
-                        getRealm().commitTransaction();
-                        moveBatter(4);
-                    case ("Strike"):
-                        System.out.println("STRIKE IS THE RESULT");
-                        getRealm().beginTransaction();
-                        pitcher.data.addS();
-                        getRealm().commitTransaction();
-                        strikes++;
-                        break;
-                    case ("Ball"):
-                        System.out.println("BALL IS THE RESULT");
-                        balls++;
-                        break;
-                    case ("Hit By Pitch"):
-                        System.out.println("HIT BY PITCH IS THE RESULT");
-                        getRealm().beginTransaction();
-                        batter.data.data.addBB();
-                        pitcher.data.addBB();
-                        batter.data.data.addHBP();
-                        getRealm().commitTransaction();
-                        balls = 4;
-                    case ("Catcher Interference"):
-                        System.out.println("CATCHER INTERFERENCE IS THE RESULT");
-                        getRealm().beginTransaction();
-                        batter.data.data.addBB();
-                        pitcher.data.addBB();
-                        getRealm().commitTransaction();
-                        balls = 4;
-                    case ("Balk"):
-                        System.out.println("BALK IS THE RESULT");
-                        getRealm().beginTransaction();
-                        batter.data.data.addBB();
-                        pitcher.data.addBB();
-                        getRealm().commitTransaction();
-                        balls = 4;
-                    case ("Intentional Walk"):
-                        System.out.println("INTENTIONAL WALK IS THE RESULT");
-                        getRealm().beginTransaction();
-                        batter.data.data.addBB();
-                        pitcher.data.addBB();
-                        getRealm().commitTransaction();
-                        balls = 4;
-                    case ("Foul Ball"):
-                        System.out.println("FOUL BALL IS THE RESULT");
-                        getRealm().beginTransaction();
-                        pitcher.data.addC();
-                        getRealm().commitTransaction();
-                        if (strikes < 2){
+                if(resultCode == Activity.RESULT_OK) {
+                    push();
+                    String[] result = Pitch.getResultKeyMessage(data);
+                    System.out.println(result[0] + " IS RESULT[0]");
+                    System.out.println(result[1] + " IS RESULT[1]");
+                    System.out.println(pitcher.data.getFirstName() + " " + pitcher.data.getLastName() + " IS THE PITCHER ----------------------");
+                    getRealm().beginTransaction();
+                    pitcher.data.addPIT();
+                    getRealm().commitTransaction();
+                    switch (result[1]) {
+                        case ("Ground Ball"):
+                            System.out.println("GROUND BALL IS THE RESULT");
+                            getRealm().beginTransaction();
+                            pitcher.data.addC();
+                            pitcher.data.addGB();
+                            getRealm().commitTransaction();
+                            break;
+                        case ("Line Drive"):
+                            System.out.println("LINE DRIVE IS THE RESULT");
+                            getRealm().beginTransaction();
+                            pitcher.data.addC();
+                            getRealm().commitTransaction();
+                            break;
+                        case ("Pop Fly"):
+                            System.out.println("POP FLY IS THE RESULT");
+                            getRealm().beginTransaction();
+                            pitcher.data.addFB();
+                            pitcher.data.addC();
+                            pitcher.data.addBSF();
+                            batter.data.data.addSF();
+                            getRealm().commitTransaction();
+                            break;
+                        case ("Bunt"):
+                            System.out.println("BUNT IS THE RESULT");
+                            getRealm().beginTransaction();
+                            pitcher.data.addC();
+                            getRealm().commitTransaction();
+                            break;
+                    }
+                    switch (result[0]) {
+                        case ("Out"):
+                            System.out.println("OUT IS THE RESULT");
+                            getRealm().beginTransaction();
+                            pitcher.data.addS();
+                            getRealm().commitTransaction();
+                            outs++;
+                            break;
+                        case ("Single"):
+                            System.out.println("SINGLE IS THE RESULT");
+                            strikes = 0;
+                            balls = 0;
+                            getRealm().beginTransaction();
+                            batter.data.data.addHits();
+                            batter.data.data.addTB(1);
+                            pitcher.data.addBHR();
+                            pitcher.data.addBH();
+                            pitcher.data.addS();
+                            getRealm().commitTransaction();
+                            moveBatter(1);
+                            break;
+                        case ("Double"):
+                            System.out.println("DOUBLE IS THE RESULT");
+                            strikes = 0;
+                            balls = 0;
+                            getRealm().beginTransaction();
+                            batter.data.data.addHits();
+                            batter.data.data.addTB(2);
+                            pitcher.data.addBHR();
+                            pitcher.data.addBH();
+                            pitcher.data.addS();
+                            getRealm().commitTransaction();
+                            moveBatter(2);
+                            break;
+                        case ("Triple"):
+                            System.out.println("TRIPLE IS THE RESULT");
+                            strikes = 0;
+                            balls = 0;
+                            getRealm().beginTransaction();
+                            batter.data.data.addHits();
+                            batter.data.data.addTB(3);
+                            pitcher.data.addBHR();
+                            pitcher.data.addBH();
+                            pitcher.data.addS();
+                            getRealm().commitTransaction();
+                            moveBatter(3);
+                            break;
+                        case ("In-The-Park Home Run"):
+                            System.out.println("IN THE PARK HOME RUN IS THE RESULT");
+                            strikes = 0;
+                            balls = 0;
+                            getRealm().beginTransaction();
+                            batter.data.data.addHits();
+                            batter.data.data.addTB(4);
+                            pitcher.data.addBHR();
+                            pitcher.data.addBH();
+                            pitcher.data.addS();
+                            getRealm().commitTransaction();
+                            moveBatter(4);
+                            break;
+                        case ("Home Run"):
+                            System.out.println("HOME RUN IS THE RESULT");
+                            strikes = 0;
+                            balls = 0;
+                            getRealm().beginTransaction();
+                            batter.data.data.addHits();
+                            batter.data.data.addTB(4);
+                            pitcher.data.addBHR();
+                            pitcher.data.addBH();
+                            pitcher.data.addS();
+                            getRealm().commitTransaction();
+                            moveBatter(4);
+                        case ("Strike"):
+                            System.out.println("STRIKE IS THE RESULT");
+                            getRealm().beginTransaction();
+                            pitcher.data.addS();
+                            getRealm().commitTransaction();
                             strikes++;
-                        }
-                        break;
+                            break;
+                        case ("Ball"):
+                            System.out.println("BALL IS THE RESULT");
+                            balls++;
+                            break;
+                        case ("Hit By Pitch"):
+                            System.out.println("HIT BY PITCH IS THE RESULT");
+                            getRealm().beginTransaction();
+                            batter.data.data.addBB();
+                            pitcher.data.addBB();
+                            batter.data.data.addHBP();
+                            getRealm().commitTransaction();
+                            balls = 4;
+                        case ("Catcher Interference"):
+                            System.out.println("CATCHER INTERFERENCE IS THE RESULT");
+                            getRealm().beginTransaction();
+                            batter.data.data.addBB();
+                            pitcher.data.addBB();
+                            getRealm().commitTransaction();
+                            balls = 4;
+                        case ("Balk"):
+                            System.out.println("BALK IS THE RESULT");
+                            getRealm().beginTransaction();
+                            batter.data.data.addBB();
+                            pitcher.data.addBB();
+                            getRealm().commitTransaction();
+                            balls = 4;
+                        case ("Intentional Walk"):
+                            System.out.println("INTENTIONAL WALK IS THE RESULT");
+                            getRealm().beginTransaction();
+                            batter.data.data.addBB();
+                            pitcher.data.addBB();
+                            getRealm().commitTransaction();
+                            balls = 4;
+                        case ("Foul Ball"):
+                            System.out.println("FOUL BALL IS THE RESULT");
+                            getRealm().beginTransaction();
+                            pitcher.data.addC();
+                            getRealm().commitTransaction();
+                            if (strikes < 2) {
+                                strikes++;
+                            }
+                            break;
 
+                    }
+                    checkGameInfo();
+                    updateGameInfo();
                 }
-                checkGameInfo();
-                updateGameInfo();
                 break;
             case (REQUEST_CODE_SUBPLAYER):
                 if (resultCode == Activity.RESULT_OK){
+                    push();
                     String[] result1 = SubPlayer.getResultKeyMessage(data);
                     printRoster("PRE SWITCH");
                     printLineUp("PRE SWITCH");
@@ -605,8 +880,29 @@ public class GameActivity extends StartingWindow {
         return tmp;
     }
 
+    private void loadBattingButtons(){
+        batter.btn.setText(batter.data.data.getFirstName()+" "+batter.data.data.getLastName().charAt(0));
+        if (fbRunner.data != null){
+            fbRunner.btn.setText(fbRunner.data.data.getFirstName()+" "+fbRunner.data.data.getLastName().charAt(0));
+        }else{
+            fbRunner.btn.setText("--");
+        }
+        if (sbRunner.data != null){
+            sbRunner.btn.setText(sbRunner.data.data.getFirstName()+" "+sbRunner.data.data.getLastName().charAt(0));
+        }else{
+            sbRunner.btn.setText("--");
+        }
+        if (tbRunner.data != null){
+            tbRunner.btn.setText(tbRunner.data.data.getFirstName()+" "+tbRunner.data.data.getLastName().charAt(0));
+        }else{
+            tbRunner.btn.setText("--");
+        }
+    }
+
+
     protected void moveBatter(int n){
         //printBatters();
+
         for (int i =0; i< n;i++) {
             if (tbRunner.data != null) {
                 if (!(tbRunner.data.data.getFirstName().equals("Opponent"))) {

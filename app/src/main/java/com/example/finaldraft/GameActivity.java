@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.finaldraft.model.Player;
 
@@ -16,6 +18,7 @@ import org.w3c.dom.Text;
 public class GameActivity extends StartingWindow {
     public static final int REQUEST_CODE_GETMESSAGE_PITCH = 6;
     public static final int REQUEST_CODE_SUBPLAYER = 19;
+    public static final int REQUEST_CODE_RUNNER = 99;
 
     // Fielding Buttons
     Button btnPitcher;
@@ -75,8 +78,8 @@ public class GameActivity extends StartingWindow {
     Button[] positionButtons = new Button[9];
 
     private PlayerNode opponent;
-    private PlayerNode atBat;
-    private PlayerNode oatBat;
+    static private PlayerNode atBat;
+    static private PlayerNode oatBat;
     public PlayerNode getOpponent() {
         return opponent;
     }
@@ -147,6 +150,13 @@ public class GameActivity extends StartingWindow {
             @Override
             public void onClick(View v) {
                 pop();
+                Toast toast=Toast.makeText(getApplicationContext(),"Undone",Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+
+                TextView textView = (TextView) toast.getView().findViewById(android.R.id.message);
+                textView.setTextColor(Color.BLACK);
+                textView.setTextSize(20);
+                toast.show();
             }
         });
         btnStats.setOnClickListener(new View.OnClickListener() {
@@ -228,6 +238,33 @@ public class GameActivity extends StartingWindow {
         });
 
 
+        btnFirstRunner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (fbRunner.data != null && sbRunner.data == null) {
+                    openRunner(fbRunner);
+                }
+            }
+        });
+        btnSecondRunner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (sbRunner.data != null && tbRunner.data == null) {
+                    openRunner(sbRunner);
+                }
+            }
+        });
+        btnThirdRunner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (tbRunner.data != null) {
+                    openRunner(tbRunner);
+                }
+                updateGameInfo();
+
+            }
+        });
+
         //start
         createOpponent();
         atBat = getStarter();
@@ -237,8 +274,22 @@ public class GameActivity extends StartingWindow {
         printRoster("GameActivity");
         printLineUp("GameActivity");
         push();
+        loadBattingButtons();
 
 
+    }
+
+    protected void openRunner(BatterNode runner){
+        Intent i = new Intent(getApplicationContext(), Runner.class);
+        Bundle bundle = new Bundle();
+        String[] stuff = new String[4];
+        stuff[0] = runner.data.data.getFirstName();
+        stuff[1] = runner.data.data.getLastName();
+        stuff[2] = runner.data.data.getPlayerNumber();
+        stuff[3] = String.valueOf(runner.order);
+        bundle.putStringArray("Runner",stuff);
+        i.putExtras(bundle);
+        startActivityForResult(i, REQUEST_CODE_RUNNER);
     }
 
     private void push(){
@@ -397,9 +448,12 @@ public class GameActivity extends StartingWindow {
         balls = g.balls;
         inning = g.inning;
         outs = g.outs;
+        points = g.points;
+        opoints = g.opoints;
 
         updateGameInfo();
         loadBattingButtons();
+
 
 
 
@@ -435,7 +489,6 @@ public class GameActivity extends StartingWindow {
             rosterNodes[j] = tmp1;
             Player newPlayer = tmp1.data;
             players[j] = newPlayer;
-            System.out.println(newPlayer.getPIT()+" "+j);
             tmp1 = tmp1.next;
         }
         game.roster = rosterNodes;
@@ -459,6 +512,8 @@ public class GameActivity extends StartingWindow {
         game.inning = inning;
         game.balls = balls;
         game.isHome = isHome;
+        game.points = points;
+        game.opoints = opoints;
 
         game.atBat = getInt(atBat);
         game.oatBat = getoInt(oatBat);
@@ -509,12 +564,13 @@ public class GameActivity extends StartingWindow {
     }
 
     private void substituteActivity(PlayerNode player){
-        Intent i = new Intent(getApplicationContext(),SubPlayer.class);
-        Bundle bundle = new Bundle();
-        bundle.putStringArray("Position",new String[]{player.data.getFirstName(),player.data.getLastName(),player.position});
-        i.putExtras(bundle);
-        startActivityForResult(i, REQUEST_CODE_SUBPLAYER);
-
+        if (!player.data.getFirstName().equals("Opponent")) {
+            Intent i = new Intent(getApplicationContext(), SubPlayer.class);
+            Bundle bundle = new Bundle();
+            bundle.putStringArray("Position", new String[]{player.data.getFirstName(), player.data.getLastName(), player.position});
+            i.putExtras(bundle);
+            startActivityForResult(i, REQUEST_CODE_SUBPLAYER);
+        }
     }
 
 
@@ -537,7 +593,6 @@ public class GameActivity extends StartingWindow {
                     break;
                 }
             }else{
-                System.out.println(tmp.data.getFirstName()+" "+tmp.data.getLastName()+" has no position");
             }
         }
         while (tmp.next != null){
@@ -558,28 +613,21 @@ public class GameActivity extends StartingWindow {
 
     protected void updateNodes(PlayerNode[] tmppositionNodes){
         pitcher = tmppositionNodes[0];
-        //System.out.println(pitcher.data.getFirstName()+" "+pitcher.data.getLastName()+" pitcher");
         catcher = tmppositionNodes[1];
-        //System.out.println(catcher.data.getFirstName()+" "+catcher.data.getLastName()+" catcher");
         firstBase = tmppositionNodes[2];
-        //System.out.println(firstBase.data.getFirstName()+" "+firstBase.data.getLastName()+" firstBase");
         secondBase = tmppositionNodes[3];
-        //System.out.println(secondBase.data.getFirstName()+" "+secondBase.data.getLastName()+" secondBase");
         thirdBase = tmppositionNodes[4];
-        //System.out.println(thirdBase.data.getFirstName()+" "+thirdBase.data.getLastName()+" thirdBase");
         shortStop = tmppositionNodes[5];
-        //System.out.println(shortStop.data.getFirstName()+" "+shortStop.data.getLastName()+" shortStop");
         leftField = tmppositionNodes[6];
-        //System.out.println(leftField.data.getFirstName()+" "+leftField.data.getLastName()+" leftField");
         centerField = tmppositionNodes[7];
-        //System.out.println(centerField.data.getFirstName()+" "+centerField.data.getLastName()+" centerField");
         rightField = tmppositionNodes[8];
-        //System.out.println(rightField.data.getFirstName()+" "+rightField.data.getLastName()+" rightField");
     }
 
     private void loadBattingPosition(PlayerNode tmp){
         batter.data = tmp;
-        //batter.data.addAB();
+        getRealm().beginTransaction();
+        batter.data.data.addAB();
+        getRealm().commitTransaction();
         batter.btn.setText(batter.data.data.getFirstName()+" "+batter.data.data.getLastName().charAt(0));
     }
 
@@ -591,6 +639,7 @@ public class GameActivity extends StartingWindow {
     }
 
     protected void checkGameInfo(){
+        boolean first = true;
         if (balls == 4){
             balls = 0;
             strikes = 0;
@@ -606,20 +655,31 @@ public class GameActivity extends StartingWindow {
             getRealm().beginTransaction();
             pitcher.data.addBK();
             batter.data.data.addK();
-            System.out.println("Added K to batter");
             getRealm().commitTransaction();
             outs++;
             shiftBatters();
+            first = false;
         }
         if (outs == 3){
             inning++;
             outs = 0;
             strikes = 0;
             balls = 0;
-            shiftBatters();
-            //swapSides();
+            if(first) {
+                shiftBatters();
+            }
+            swapSides();
         }
 
+    }
+
+    private void swapSides(){
+        if (isHome){
+            isHome = false;
+        }else{
+            isHome = true;
+        }
+        updateGame();
     }
 
     private String getInning(int inning){
@@ -629,7 +689,7 @@ public class GameActivity extends StartingWindow {
         }else{
             s+= "v";
         }
-        s+= String.valueOf(Math.round(inning/2));
+        s+= String.valueOf(Math.round((inning+2)/2));
         return s;
     }
 
@@ -658,33 +718,29 @@ public class GameActivity extends StartingWindow {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        System.out.println("ATBAT IS: "+atBat.data.getFirstName());
+        System.out.println("OATBAT IS: "+oatBat.data.getFirstName()+" "+oatBat.data.getLastName());
         switch (requestCode){
             case (REQUEST_CODE_GETMESSAGE_PITCH):
                 if(resultCode == Activity.RESULT_OK) {
                     push();
                     String[] result = Pitch.getResultKeyMessage(data);
-                    System.out.println(result[0] + " IS RESULT[0]");
-                    System.out.println(result[1] + " IS RESULT[1]");
-                    System.out.println(pitcher.data.getFirstName() + " " + pitcher.data.getLastName() + " IS THE PITCHER ----------------------");
                     getRealm().beginTransaction();
                     pitcher.data.addPIT();
                     getRealm().commitTransaction();
                     switch (result[1]) {
                         case ("Ground Ball"):
-                            System.out.println("GROUND BALL IS THE RESULT");
                             getRealm().beginTransaction();
                             pitcher.data.addC();
                             pitcher.data.addGB();
                             getRealm().commitTransaction();
                             break;
                         case ("Line Drive"):
-                            System.out.println("LINE DRIVE IS THE RESULT");
                             getRealm().beginTransaction();
                             pitcher.data.addC();
                             getRealm().commitTransaction();
                             break;
                         case ("Pop Fly"):
-                            System.out.println("POP FLY IS THE RESULT");
                             getRealm().beginTransaction();
                             pitcher.data.addFB();
                             pitcher.data.addC();
@@ -693,7 +749,6 @@ public class GameActivity extends StartingWindow {
                             getRealm().commitTransaction();
                             break;
                         case ("Bunt"):
-                            System.out.println("BUNT IS THE RESULT");
                             getRealm().beginTransaction();
                             pitcher.data.addC();
                             getRealm().commitTransaction();
@@ -701,14 +756,12 @@ public class GameActivity extends StartingWindow {
                     }
                     switch (result[0]) {
                         case ("Out"):
-                            System.out.println("OUT IS THE RESULT");
                             getRealm().beginTransaction();
                             pitcher.data.addS();
                             getRealm().commitTransaction();
                             outs++;
                             break;
                         case ("Single"):
-                            System.out.println("SINGLE IS THE RESULT");
                             strikes = 0;
                             balls = 0;
                             getRealm().beginTransaction();
@@ -721,7 +774,6 @@ public class GameActivity extends StartingWindow {
                             moveBatter(1);
                             break;
                         case ("Double"):
-                            System.out.println("DOUBLE IS THE RESULT");
                             strikes = 0;
                             balls = 0;
                             getRealm().beginTransaction();
@@ -734,7 +786,6 @@ public class GameActivity extends StartingWindow {
                             moveBatter(2);
                             break;
                         case ("Triple"):
-                            System.out.println("TRIPLE IS THE RESULT");
                             strikes = 0;
                             balls = 0;
                             getRealm().beginTransaction();
@@ -747,7 +798,6 @@ public class GameActivity extends StartingWindow {
                             moveBatter(3);
                             break;
                         case ("In-The-Park Home Run"):
-                            System.out.println("IN THE PARK HOME RUN IS THE RESULT");
                             strikes = 0;
                             balls = 0;
                             getRealm().beginTransaction();
@@ -760,7 +810,6 @@ public class GameActivity extends StartingWindow {
                             moveBatter(4);
                             break;
                         case ("Home Run"):
-                            System.out.println("HOME RUN IS THE RESULT");
                             strikes = 0;
                             balls = 0;
                             getRealm().beginTransaction();
@@ -772,18 +821,15 @@ public class GameActivity extends StartingWindow {
                             getRealm().commitTransaction();
                             moveBatter(4);
                         case ("Strike"):
-                            System.out.println("STRIKE IS THE RESULT");
                             getRealm().beginTransaction();
                             pitcher.data.addS();
                             getRealm().commitTransaction();
                             strikes++;
                             break;
                         case ("Ball"):
-                            System.out.println("BALL IS THE RESULT");
                             balls++;
                             break;
                         case ("Hit By Pitch"):
-                            System.out.println("HIT BY PITCH IS THE RESULT");
                             getRealm().beginTransaction();
                             batter.data.data.addBB();
                             pitcher.data.addBB();
@@ -791,28 +837,24 @@ public class GameActivity extends StartingWindow {
                             getRealm().commitTransaction();
                             balls = 4;
                         case ("Catcher Interference"):
-                            System.out.println("CATCHER INTERFERENCE IS THE RESULT");
                             getRealm().beginTransaction();
                             batter.data.data.addBB();
                             pitcher.data.addBB();
                             getRealm().commitTransaction();
                             balls = 4;
                         case ("Balk"):
-                            System.out.println("BALK IS THE RESULT");
                             getRealm().beginTransaction();
                             batter.data.data.addBB();
                             pitcher.data.addBB();
                             getRealm().commitTransaction();
                             balls = 4;
                         case ("Intentional Walk"):
-                            System.out.println("INTENTIONAL WALK IS THE RESULT");
                             getRealm().beginTransaction();
                             batter.data.data.addBB();
                             pitcher.data.addBB();
                             getRealm().commitTransaction();
                             balls = 4;
                         case ("Foul Ball"):
-                            System.out.println("FOUL BALL IS THE RESULT");
                             getRealm().beginTransaction();
                             pitcher.data.addC();
                             getRealm().commitTransaction();
@@ -830,14 +872,66 @@ public class GameActivity extends StartingWindow {
                 if (resultCode == Activity.RESULT_OK){
                     push();
                     String[] result1 = SubPlayer.getResultKeyMessage(data);
-                    printRoster("PRE SWITCH");
-                    printLineUp("PRE SWITCH");
                     switchPlayer(result1[0],result1[1],result1[2],result1[3],result1[4],result1[5],result1[6]);
-                    printRoster("POST SWITCH");
-                    printLineUp("POST SWITCH");
                     loadFieldingPosition(getStarter());
                 }
                 break;
+            case (REQUEST_CODE_RUNNER):
+                if (resultCode == Activity.RESULT_OK){
+                    push();
+                    String[] result = Runner.getResultKeyMessage(data);
+                    BatterNode tmp = new BatterNode();
+                    switch (result[1]){
+                        case ("1"):
+                            tmp = fbRunner;
+                            break;
+                        case ("2"):
+                            tmp = sbRunner;
+                            break;
+                        case ("3"):
+                            tmp = tbRunner;
+                            break;
+                    }
+                    switch (result[0]){
+                        case ("Out"):
+                            outs++;
+                            tmp.data = null;
+                            tmp.btn.setText("--");
+                            break;
+                        case ("Safe"):
+                            getRealm().beginTransaction();
+                            tmp.data.data.addSS();
+                            tmp.data.data.addSA();
+                            getRealm().commitTransaction();
+                            if (!(tmp == tbRunner)) {
+                                tmp.next.data = tmp.data;
+                                tmp.data = null;
+                                tmp.btn.setText("--");
+
+
+                            }else{
+                                if (isHome) {
+                                    points++;
+                                } else {
+                                    opoints++;
+                                }
+                            }
+                            tmp.btn.setText("--");
+                            break;
+                        case ("SOut"):
+                            getRealm().beginTransaction();
+                            tmp.data.data.addSA();
+                            getRealm().commitTransaction();
+                            tmp.data = null;
+                            tmp.btn.setText("--");
+                            break;
+                    }
+                    updateGameInfo();
+                    loadBattingButtons();
+                    checkGameInfo();
+
+                }
+
 
         }
     }
@@ -916,29 +1010,23 @@ public class GameActivity extends StartingWindow {
 
             }
             if (sbRunner.data != null) {
-                //System.out.println(tbRunner.data.data.getFirstName() + " Third Base Before");
                 tbRunner.data = sbRunner.data;
-                System.out.println(tbRunner.data.data.getFirstName() + " Third Base After");
                 tbRunner.btn.setText(tbRunner.data.data.getFirstName() + " " + tbRunner.data.data.getLastName().charAt(0));
                 tbRunner.btn.setBackgroundColor(Color.GREEN);
                 sbRunner.data = null;
                 sbRunner.btn.setText("--");
             } else {
-                System.out.println("Third Base else");
                 tbRunner.data = null;
                 tbRunner.btn.setText("--");
 
             }
             if (fbRunner.data != null) {
-                //System.out.println(sbRunner.data.data.getFirstName() + " Second Base Before");
                 sbRunner.data = fbRunner.data;
-                System.out.println(sbRunner.data.data.getFirstName() + " Second Base After");
                 sbRunner.btn.setText(sbRunner.data.data.getFirstName() + " " + sbRunner.data.data.getLastName().charAt(0));
                 sbRunner.btn.setBackgroundColor(Color.GREEN);
                 fbRunner.data = null;
                 fbRunner.btn.setText("--");
             } else {
-                System.out.println("Second Base else");
                 sbRunner.data = null;
                 sbRunner.btn.setText("--");
             }
@@ -953,10 +1041,20 @@ public class GameActivity extends StartingWindow {
     }
 
     private void shiftBatters(){
-        System.out.println("Shiftting batters");
-        batter.data = batter.data.next;
-        System.out.println("Batter is: "+batter.data.data.getFirstName());
-        atBat = batter.data;
+        if (batter.data.next != null) {
+            batter.data = batter.data.next;
+        }else{
+            if (batter.data.data.getFirstName().equals("Opponent")){
+                batter.data = getOpponent();
+            }else{
+                batter.data = getStarter();
+            }
+        }
+        if (batter.data.data.getFirstName().equals("Opponent")){
+            oatBat = batter.data;
+        }else {
+            atBat = batter.data;
+        }
         getRealm().beginTransaction();
         batter.data.data.addAB();
         pitcher.data.addBAB();

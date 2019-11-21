@@ -1,48 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <Button
-        android:id="@+id/btnBack"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="96dp"
-        android:layout_height="46dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/option_buttons"
-        android:text="Back"
-        android:textSize="30sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/lblBallInPlay"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+    android:layout_height="match_parent"
+    android:background="#Fffbf2">
 
     <TextView
         android:id="@+id/lblPitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_width="0dp"
+        android:layout_height="46dp"
         android:layout_marginBottom="8dp"
+        android:background="#1e4c2b"
+        android:gravity="center"
         android:text="Pitch"
+        android:textColor="#Fffbf2"
         android:textSize="36sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.007" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <ScrollView
         android:layout_width="550dp"
@@ -74,7 +51,7 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginBottom="8dp"
-                android:background="@drawable/option_buttons"
+                android:background="#fdb813"
                 android:gravity="left|center_vertical"
                 android:paddingLeft="10dp"
                 android:text="Strike"
@@ -82,7 +59,8 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lblPitch" />
+                app:layout_constraintTop_toBottomOf="@+id/lblPitch"
+                app:layout_constraintVertical_bias="1.0" />
 
             <Button
                 android:id="@+id/btnBall"
@@ -94,7 +72,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:background="@drawable/option_buttons"
+                android:background="#fdb813"
                 android:gravity="left|center_vertical"
                 android:paddingLeft="10dp"
                 android:text="Ball"
@@ -115,7 +93,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:background="@drawable/option_buttons"
+                android:background="#fdb813"
                 android:gravity="left|center_vertical"
                 android:paddingLeft="10dp"
                 android:text="Ball In Play"
@@ -136,7 +114,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:background="@drawable/option_buttons"
+                android:background="#fdb813"
                 android:gravity="left|center_vertical"
                 android:paddingLeft="10dp"
                 android:text="Foul Ball"
@@ -158,7 +136,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:background="@drawable/option_buttons"
+                android:background="#fdb813"
                 android:gravity="left|center_vertical"
                 android:paddingLeft="10dp"
                 android:text="Hit By Pitch"
@@ -179,7 +157,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:background="@drawable/option_buttons"
+                android:background="#fdb813"
                 android:gravity="left|center_vertical"
                 android:paddingLeft="10dp"
                 android:text="Intentional Walk"
@@ -200,7 +178,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:background="@drawable/option_buttons"
+                android:background="#fdb813"
                 android:gravity="left|center_vertical"
                 android:paddingLeft="10dp"
                 android:text="Catcher Interference"
@@ -221,7 +199,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:background="@drawable/option_buttons"
+                android:background="#fdb813"
                 android:gravity="left|center_vertical"
                 android:paddingLeft="10dp"
                 android:text="Balk"
@@ -233,5 +211,24 @@
                 app:layout_constraintVertical_bias="1.0" />
         </LinearLayout>
     </ScrollView>
+
+    <Button
+        android:id="@+id/btnBack"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="96dp"
+        android:layout_height="46dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="#fdb813"
+        android:text="Back"
+        android:textSize="24sp"
+        android:textStyle="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
 </android.support.constraint.ConstraintLayout>

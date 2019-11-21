@@ -1,5 +1,7 @@
 package com.example.finaldraft.model;
 
+import java.math.RoundingMode;
+
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -78,21 +80,21 @@ public class Player extends RealmObject {
         if (AB == 0){
             return "--";
         }
-        return String.valueOf((double)(hits/AB));
+        return String.valueOf(((double)(hits/AB))*100/100.0000d);
     }
 
     public String getOBP() {
         if((AB+BB+ HBP +SF) == 0){
             return "--";
         }
-        return String.valueOf((double)((hits+BB+ HBP)/(AB+BB+ HBP +SF)));
+        return String.valueOf(Math.round(((double)((hits+BB+ HBP)/(AB+BB+ HBP +SF))*100/100.0000d)));
     }
 
     public String getBBK() {
         if (K == 0){
             return "--";
         }
-        return String.valueOf((double)(BB/ K));
+        return String.valueOf(Math.round(((double)(BB/ K))*100/100.0000d));
     }
 
     public String getOPS() {
@@ -102,7 +104,7 @@ public class Player extends RealmObject {
         else if ((AB+BB+ HBP +SF)+(TB /AB)==0){
             return "--";
         }
-        return String.valueOf((double)(((hits+BB+ HBP)/(AB+BB+ HBP +SF))+(HBP /AB)));
+        return String.valueOf(Math.round(((double)(((hits+BB+ HBP)/(AB+BB+ HBP +SF))+(HBP /AB))*100/100.0000d)));
     }
     //Batting Stats Methods
 
@@ -221,29 +223,28 @@ public class Player extends RealmObject {
         if ((BAB - BK - BHR + BSF) == 0){
             return "--";
         }
-        return String.valueOf((double)((BH - BHR)/(BAB - BK - BHR + BSF)));
+        return String.valueOf(Math.round(((double)((BH - BHR)/(BAB - BK - BHR + BSF))*100/100.0000d)));
     }
 
     public String getGF() {
         if (FB == 0){
             return "--";
         }
-        return String.valueOf((double)(GB / FB));
+        return String.valueOf(Math.round(((double)(GB / FB))*100/100.0000d));
     }
 
     public String getKBB() {
         if (BB == 0){
             return "--";
         }
-        return String.valueOf((double)(BK / BB));
+        return String.valueOf(Math.round(((double)(BK / BB))*100/100.0000d));
     }
 
     public String getSP() {
         if (PIT == 0){
             return "--";
         }
-        System.out.println("PIT IS: "+PIT+" S IS: "+S);
-        System.out.println("S/PIT IS: "+((double)(S/PIT)));
+
         return String.valueOf((double)S/PIT);
     }
 
@@ -251,7 +252,7 @@ public class Player extends RealmObject {
         if (PIT == 0){
             return "--";
         }
-        return String.valueOf((double)(C /PIT));
+        return String.valueOf(Math.round(((double)(C /PIT))*100/100.0000d));
     }
     //Pitching Stats Methods
 
@@ -276,7 +277,7 @@ public class Player extends RealmObject {
         if (SA == 0){
             return "--";
         }
-        return String.valueOf((double)(SA/SS));
+        return String.valueOf(Math.round(((double)(SA/SS))*100/100.0000d));
     }
 
     public String[] getBattingStats(){

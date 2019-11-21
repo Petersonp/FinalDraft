@@ -65,13 +65,13 @@ public class StartingWindow extends AppCompatActivity {
         setContentView(R.layout.startingwindow_layout);
         Realm.init(this);
         setRealm(Realm.getDefaultInstance());
-        /*
-        RealmConfiguration config = new RealmConfiguration
+
+        /*RealmConfiguration config = new RealmConfiguration
                 .Builder()
                 .deleteRealmIfMigrationNeeded()
                 .build();
-        setRealm(Realm.getInstance(config));
-        */
+        setRealm(Realm.getInstance(config));*/
+
 
 
 

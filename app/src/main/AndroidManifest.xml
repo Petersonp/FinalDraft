@@ -58,6 +58,14 @@
             android:theme="@style/AppTheme.NewActivity"
             android:screenOrientation="landscape">
         </activity>
+        <activity android:name=".Runner"
+            android:theme="@style/AppTheme.NewActivity"
+            android:screenOrientation="landscape">
+        </activity>
+        <activity android:name=".SafeOut"
+            android:theme="@style/AppTheme.NewActivity"
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>

@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.finaldraft.model.Player;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
 
 import io.realm.Realm;
@@ -268,6 +269,7 @@ public class LineUp extends StartingWindow {
         TableRow tr = new TableRow(getApplicationContext());
         // Order spinner
         final Spinner spnIndex = new Spinner(getApplicationContext());
+        spnIndex.setBackgroundResource(R.drawable.yellow_button);
         spnIndex.setId(ids[0]);
         spnIndex.setLayoutParams(new TableRow.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));
         ArrayList<String> indexArray = new ArrayList<String>();
@@ -281,6 +283,7 @@ public class LineUp extends StartingWindow {
 
         // Position spinner
         final Spinner spnPos = new Spinner(getApplicationContext());
+        spnPos.setBackgroundResource(R.drawable.yellow_button);
         spnPos.setId(ids[4]);
         spnPos.setLayoutParams(new TableRow.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));
         ArrayList<String> posArray = new ArrayList<String>();
@@ -305,6 +308,7 @@ public class LineUp extends StartingWindow {
 
         // Remove Button
         Button btnRemove = new Button(getApplicationContext());
+        btnRemove.setBackgroundResource(R.drawable.yellow_button);
         btnRemove.setId(ids[5]);
         btnRemove.setText("Remove");
         btnRemove.setPadding(20,0,20,0);

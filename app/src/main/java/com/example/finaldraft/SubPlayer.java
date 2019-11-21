@@ -149,6 +149,7 @@ public class SubPlayer extends StartingWindow {
         }
         if(!isHeader){
             Button btnTmp = new Button(getApplicationContext());
+            btnTmp.setBackgroundResource(R.drawable.yellow_button);
             btnTmp.setText("Sub");
             btnTmp.setId(sub_id+count);
             System.out.println("SETTING ID OF: "+btnTmp.getText().toString()+": TO: "+(sub_id+count));
@@ -191,6 +192,7 @@ public class SubPlayer extends StartingWindow {
         if(!isHeader){
             Button btnTmp = new Button(getApplicationContext());
             btnTmp.setText("Sub");
+            btnTmp.setBackgroundResource(R.drawable.yellow_button);
             btnTmp.setId(sub_id+count);
             System.out.println("SETTING ID OF: "+btnTmp.getText().toString()+": TO: "+(sub_id+count));
             btnTmp.setPadding(20,0,20,0);

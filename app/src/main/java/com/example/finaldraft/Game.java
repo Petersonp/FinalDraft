@@ -20,6 +20,8 @@ public class Game {
     int outs;
     int balls;
     int inning;
+    int points;
+    int opoints;
 
     Game next;
     Game back;

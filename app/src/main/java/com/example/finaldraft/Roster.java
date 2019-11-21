@@ -51,7 +51,6 @@ public class Roster extends StartingWindow {
         tblRoster = (TableLayout) findViewById(R.id.tblLineUp);
         btnNewPlayer = (Button) findViewById(R.id.btnNewPlayer);
         btnBack = (Button) findViewById(R.id.btnBack);
-        btnTmp = (Button) findViewById(R.id.btnPrint);
 
         btnNewPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,19 +118,21 @@ public class Roster extends StartingWindow {
             lblTmp.setId(ids[i]);
             lblTmp.setLayoutParams(new TableRow.LayoutParams(GridLayout.LayoutParams.WRAP_CONTENT, GridLayout.LayoutParams.WRAP_CONTENT));
             lblTmp.setTextSize(20);
-            lblTmp.setPadding(40,0,55,0);
+            lblTmp.setPadding(70,0,70,0);
             tr.addView(lblTmp);
         }
         Button btnEdit = new Button(getApplicationContext());
         btnEdit.setId(ids[4]);
         btnEdit.setText("Edit");
-        btnEdit.setPadding(20,0,20,0);
+        btnEdit.setPadding(15,0,15,0);
+        btnEdit.setBackgroundResource(R.drawable.yellow_button);
         tr.addView(btnEdit);
 
         Button btnRemove = new Button(getApplicationContext());
         btnRemove.setId(ids[5]);
         btnRemove.setText("Remove");
-        btnRemove.setPadding(20,0,20,0);
+        btnRemove.setPadding(15,0,15,0);
+        btnRemove.setBackgroundResource(R.drawable.yellow_button);
         tr.addView(btnRemove);
 
         tblRoster.addView(tr);

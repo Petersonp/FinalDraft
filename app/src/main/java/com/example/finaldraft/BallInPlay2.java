@@ -9,8 +9,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class BallInPlay2 extends StartingWindow {
+    // constant
     public static final String RESULT_KEY_MESSAGE_BALLINPLAY2 = "com.example.a12fixedfirstdraft.BallInPlay2 - Return Message";
     DisplayMetrics displayMetrics;
+    // instance variables
     Button btnBack;
     TextView lblBallInPlay2;
     Button btnOut;
@@ -28,6 +30,7 @@ public class BallInPlay2 extends StartingWindow {
         Bundle bundle = getIntent().getExtras();
         title = bundle.getString("Title");
 
+        // changing dimensions of pop up window
         displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int width = displayMetrics.widthPixels;
@@ -46,6 +49,7 @@ public class BallInPlay2 extends StartingWindow {
 
         lblBallInPlay2.setText(title);
 
+        // event listeners
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,6 +107,7 @@ public class BallInPlay2 extends StartingWindow {
     }
 
     public void returnResult(String result){
+        // returning input of user
         String[] message = new String[3];
         message[1] = title;
         message[0] = result;

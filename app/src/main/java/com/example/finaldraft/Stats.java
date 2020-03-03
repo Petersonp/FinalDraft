@@ -14,10 +14,12 @@ import io.realm.Realm;
 import io.realm.RealmResults;
 
 public class Stats extends StartingWindow {
+    // constants
     public static final String BATTING_STATS = "BattingStats";
     public static final String PITCHING_STATS = "PitchingStats";
     public static final String RUNNING_STATS = "RunningStats";
 
+    // instance variables for buttons
     Button btnPitching;
     Button btnBatting;
     Button btnRunning;
@@ -73,23 +75,26 @@ public class Stats extends StartingWindow {
         tblStats.removeAllViews();
         switch (statsType){
             case (BATTING_STATS):
+                // if "Batting" button pressed
                 String[] BHeaders = {"Batter Name","BA","OBP","OPS","BBK","BB","K"};
                 addStatRows(BHeaders);
-                for (Player player: results){
+                for (Player player: results){//for every player in the database
                     addStatRows(player.getBattingStats());
                 }
                 break;
             case (PITCHING_STATS):
+                // if "Pitching" button pressed
                 String[] PHeaders = {"Pitcher Name","BABIP","GF","PIT","K","KBB","SP","CP"};
                 addStatRows(PHeaders);
-                for (Player player: results){
+                for (Player player: results){//for every player in the database
                     addStatRows(player.getPitchingStats());
                 }
                 break;
             case (RUNNING_STATS):
+                // if "Running" button pressed
                 String[] RHeaders = {"Runner Name","SP","SA","SS"};
                 addStatRows(RHeaders);
-                for (Player player: results){
+                for (Player player: results){ //for every player in the database
                     addStatRows(player.getRunningStats());
                 }
                 break;
@@ -97,9 +102,10 @@ public class Stats extends StartingWindow {
     }
 
     private void addStatRows(String[] stats){
+        // adding new table row to stats table
         TableRow trTmp = new TableRow(getApplicationContext());
         trTmp.setPadding(10, 0, 0, 0);
-        for(int i = 0; i < stats.length;i++){
+        for(int i = 0; i < stats.length;i++){ //dynamically adding text views to table row
             TextView lblTmp = new TextView(getApplicationContext());
             lblTmp.setText(stats[i]);
             lblTmp.setLayoutParams(new TableRow.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));

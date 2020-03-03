@@ -46,12 +46,14 @@ public class Roster extends StartingWindow {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.roster_layout);
 
-        //views
         realm = getRealm();
+
+        //setting views
         tblRoster = (TableLayout) findViewById(R.id.tblLineUp);
         btnNewPlayer = (Button) findViewById(R.id.btnNewPlayer);
         btnBack = (Button) findViewById(R.id.btnBack);
 
+        // event listeners
         btnNewPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -72,15 +74,16 @@ public class Roster extends StartingWindow {
         header.setPadding(10,0,0,0);
 
         loadTable();
-        printRoster("Roster");
     }
 
+
     private void loadTable(){
-        System.out.println("LOADING TABLE");
+        //Adding all of the players from the database roster to the table
         tblRoster.removeAllViews();
         TableRow header = new TableRow(getApplicationContext());
         header.setPadding(10,0,0,0);
         String[] head = {"   ","First Name","Last Name","#","Edit","Remove"};
+        // adding header to table
         addTableRow(head);
         tblRoster.addView(header);
         count = 0;
@@ -94,7 +97,10 @@ public class Roster extends StartingWindow {
         }
     }
 
+
     private void addTableRow(String[] msg){
+        // when receiving just an array of strings
+        // for header
         TableRow tr = new TableRow(getApplicationContext());
         tr.setPadding(10, 0, 10, 0);
         for (int i = 0; i < msg.length;i++){
@@ -108,10 +114,12 @@ public class Roster extends StartingWindow {
     }
 
     private void addTableRow(int[] ids, String[] msg){
-
+        // when receiving array of strings and int
+        // for player information
         TableRow tr = new TableRow(getApplicationContext());
         tr.setId(ids[6]);
         tr.setPadding(10,0,0,0);
+        // dynamically adding player information in text views
         for (int i =0; i <4;i++){
             TextView lblTmp = new TextView(getApplicationContext());
             lblTmp.setText(msg[i]);
@@ -121,6 +129,7 @@ public class Roster extends StartingWindow {
             lblTmp.setPadding(70,0,70,0);
             tr.addView(lblTmp);
         }
+        // dynamically adding edit button
         Button btnEdit = new Button(getApplicationContext());
         btnEdit.setId(ids[4]);
         btnEdit.setText("Edit");
@@ -128,6 +137,7 @@ public class Roster extends StartingWindow {
         btnEdit.setBackgroundResource(R.drawable.yellow_button);
         tr.addView(btnEdit);
 
+        // dynamically adding remove button
         Button btnRemove = new Button(getApplicationContext());
         btnRemove.setId(ids[5]);
         btnRemove.setText("Remove");
@@ -136,6 +146,7 @@ public class Roster extends StartingWindow {
         tr.addView(btnRemove);
 
         tblRoster.addView(tr);
+        // event listener for remove button
         btnRemove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,6 +155,7 @@ public class Roster extends StartingWindow {
                 RosterCount--;
             }
         });
+        // event listener for edit button
         btnEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,19 +168,21 @@ public class Roster extends StartingWindow {
     private void removePlayer(View v){
         int ref = v.getId()-remove_id;
         final RealmResults<Player> results = realm.where(Player.class).findAll();
-        Player player = results.get(ref);
+        Player player = results.get(ref); // receiving ref to pbject based on index
         realm.beginTransaction();
-        player.deleteFromRealm();
+        player.deleteFromRealm(); // removing player object from realm database
         realm.commitTransaction();
         loadTable();
     }
     private void removePlayerNode(View view){
+        //removing a player from the roster table
         RosterNode tmp = getRoster();
         int ref = view.getId()-remove_id;
+        // getting references to a players text views based on index
         TextView tmpFirst = (TextView) findViewById(ref+first_id);
         TextView tmpLast = (TextView) findViewById(ref+last_id);
         TextView tmpNumber = (TextView) findViewById(ref+no_id);
-        if (tmp.index==(ref+1)){
+        if (tmp.index==(ref+1)){  // checking if first obejct in linked list
             if (tmp.next == null){
                 setRoster(null);
             }else{
@@ -178,7 +192,7 @@ public class Roster extends StartingWindow {
                     tmp = tmp.next;
                 }
             }
-        }else{
+        }else{ // checking for subsequent objects in linked list
             while (tmp.next.index != (ref+1)){
                 tmp = tmp.next;
             }
@@ -192,14 +206,14 @@ public class Roster extends StartingWindow {
                 }
             }
         }
-        printRoster("Remove Player Node");
     }
 
     private void addPlayerNode(Player player, int index){
+        // adding a new player node to the roster
         RosterNode newPlayer = new RosterNode();
         newPlayer.data = player;
         newPlayer.index = index;
-        if (getRoster() == null){
+        if (getRoster() == null){ // checking if linked list is empty
             setRoster(newPlayer);
         }else{
             RosterNode tmp = getRoster();
@@ -212,12 +226,13 @@ public class Roster extends StartingWindow {
     }
 
     private void editPlayerNode(Player player, int index){
+        // editing a player in the roster
         RosterNode tmp = getRoster();
-        if (tmp.index == index){
+        if (tmp.index == index){ // checking if first object in linked list is player
             tmp.data = player;
         }else{
             System.out.println("Comparing: "+tmp.next.index+" to: "+index);
-            while (tmp.next.index!= index) {
+            while (tmp.next.index!= index) { // checking subsequent objects in linked list
                 tmp = tmp.next;
             }
             tmp.next.data = player;
@@ -226,8 +241,10 @@ public class Roster extends StartingWindow {
     }
 
     protected void openEdit(View v){
+        // opening edit window
         isEdit = true;
         int ref = v.getId()-edit_id;
+        // finding ref to text views depending on player index
         TextView lblIndex = (TextView) findViewById(index_id+ref);
         TextView lblFirst = (TextView) findViewById(first_id+ref);
         TextView lblLast = (TextView) findViewById(last_id+ref);
@@ -236,21 +253,24 @@ public class Roster extends StartingWindow {
                 lblFirst.getText().toString(),
                 lblLast.getText().toString(),
                 lblNumber.getText().toString(),
-                lblIndex.getText().toString());
+                lblIndex.getText().toString()); //passing data to next activity
     }
 
+
+    ////////////////RECEIVING DATA FROM OTHER ACTIVITY//////////////
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case (REQUEST_CODE_GETMESSAGE_PLAYERINFO):
                 if (resultCode == Activity.RESULT_OK) {
-                    if (isEdit) {
+                    if (isEdit) { // if a player information was edited
                         final String[] result = PlayerInfo.getResultKeyMessage(data);
                         int ref = Integer.parseInt(result[3]);
                         final RealmResults<Player> results = realm.where(Player.class).findAll();
                         Player player = results.get(ref-1);
                         realm.beginTransaction();
+                        // updating attributes of player object
                         player.setFirstName(result[0]);
                         player.setLastName(result[1]);
                         player.setPlayerNumber(result[2]);
@@ -259,6 +279,7 @@ public class Roster extends StartingWindow {
                         loadTable();
                     }else{
                         final String[] result = PlayerInfo.getResultKeyMessage(data);
+                        // creating new player object based on results
                         Player player = new Player();
                         player.setFirstName(result[0]);
                         player.setLastName(result[1]);
@@ -275,8 +296,10 @@ public class Roster extends StartingWindow {
                 break;
         }
     }
+    ////////////////RECEIVING DATA FROM OTHER ACTIVITY//////////////
 
     private void openPlayerInfo(boolean isEdit, String firstName, String lastName, String playerNumber, String index){
+        // opening player information activity
         String[] info = {String.valueOf(isEdit),firstName,lastName,playerNumber,index};
         Intent i = new Intent(getApplicationContext(),PlayerInfo.class);
         Bundle b = new Bundle();
@@ -285,19 +308,6 @@ public class Roster extends StartingWindow {
         startActivityForResult(i, REQUEST_CODE_GETMESSAGE_PLAYERINFO);
     }
 
-    private List<Player> readData(){
-        RealmResults<Player> players = realm.where(Player.class).findAll();
-        String data = "";
-        for (Player player: players){
-            try{
-                Log.d(TAG, "readData: Reading Data");
-                data += player.toString();
-            }catch (NullPointerException e){
-                e.printStackTrace();
-            }
-        }
-        return players;
-    }
 
     @Override
     protected void onDestroy() {

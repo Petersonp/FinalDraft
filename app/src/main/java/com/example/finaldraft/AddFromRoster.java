@@ -29,6 +29,7 @@ public class AddFromRoster extends Activity {
 
     Realm realm;
 
+    //Ids for the table rows
     int count = 0;
     int index_id = 4083;
     int first_id = 4183;
@@ -49,6 +50,7 @@ public class AddFromRoster extends Activity {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // closing window
                 setResult(Activity.RESULT_CANCELED);
                 finish();
             }
@@ -60,6 +62,7 @@ public class AddFromRoster extends Activity {
                     setResult(Activity.RESULT_OK);
                     finish();
                 }else{
+                    // error message
                     Toast toast=Toast.makeText(getApplicationContext(),"Players in Line Up Exceeds 9",Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.getView().setBackgroundResource(R.drawable.error_message);
@@ -79,12 +82,10 @@ public class AddFromRoster extends Activity {
     private boolean ninePlayers(){
         int count = 0;
         RosterNode tmp = StartingWindow.getRoster();
-        System.out.println(tmp.data.getFirstName()+": "+tmp.isChecked);
         if (tmp.isChecked){
             count++;
         }
         while (tmp.next != null){
-            System.out.println(tmp.next.data.getFirstName()+": "+tmp.next.isChecked);
             if (tmp.next.isChecked){
                 count++;
             }
@@ -94,7 +95,7 @@ public class AddFromRoster extends Activity {
     }
 
     private void loadTable(){
-        StartingWindow.printRoster("LOADTABLE");
+        // adding table rows of players from the roster
         tblRoster.removeAllViews();
         count=0;
         RosterNode tmp = StartingWindow.getRoster();
@@ -104,6 +105,7 @@ public class AddFromRoster extends Activity {
         for (Player player: results){
             System.out.println("TMP is: "+tmp.data.getFirstName());
             if (tmp.isChecked == false) {
+                // only displaying the players that were not selected yet
                 int[] ids = {index_id+count,first_id + count, last_id + count, number_id + count, select_id + count};
                 String[] msg = {String.valueOf(tmp.index),tmp.data.getFirstName(), tmp.data.getLastName(), tmp.data.getPlayerNumber()};
                 addTableRow(ids,msg);
@@ -114,6 +116,8 @@ public class AddFromRoster extends Activity {
     }
     //Polymorphism
     private void addTableRow(String[] msg){
+        // adding a table row if only given an array of strings
+        // for headers
         TableRow tr = new TableRow(getApplicationContext());
         tr.setPadding(10, 0, 10, 0);
         for (int i = 0; i < msg.length;i++){
@@ -128,9 +132,11 @@ public class AddFromRoster extends Activity {
 
 
     private void addTableRow(int[] ids, String[] msg) {
+        // adding a table row if given array of strings and ints
+        // for adding players
         TableRow tr = new TableRow(getApplicationContext());
         tr.setPadding(10, 0, 10, 0);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) { // dynamically adding text views
             TextView lblTmp = new TextView(getApplicationContext());
             lblTmp.setId(ids[i]);
             lblTmp.setText(msg[i]);
@@ -140,29 +146,26 @@ public class AddFromRoster extends Activity {
             tr.addView(lblTmp);
         }
 
+        // dynamically adding a check box
         CheckBox cbTmp = new CheckBox(getApplicationContext());
         cbTmp.setId(ids[4]);
         cbTmp.setLayoutParams(new TableRow.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));
         cbTmp.setPadding(0, 0, 0, 0);
-        //cbTmp.setChecked(true);
-        //addPlayer(ids[4]-select_id,true);
         tr.addView(cbTmp);
 
         tblRoster.addView(tr);
 
+        // event listner for check box
         cbTmp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean checked = ((CheckBox) v).isChecked();
-                int ref = v.getId() - select_id;
+                int ref = v.getId() - select_id; // calculating the index number of a player based
+                                                 // on what checkbox was selected
                 if (checked) {
                     addPlayer(ref,true);
-                    //getPlayer(ref);
-                    //printIndex();
-                    //LineUp.updateLineUp();
                 }else{
                     addPlayer(ref,false);
-                    //removePlayer(ref);
                 }
             }
         });
@@ -171,17 +174,17 @@ public class AddFromRoster extends Activity {
     }
 
     protected void addPlayer(int ref, boolean isChecked){
+        // for changing the isChecked boolean of a player based on their index
         RosterNode tmp = StartingWindow.getRoster();
+        // locating reference of the text views based on index
         TextView lblFirst = (TextView) findViewById(first_id+ref);
         TextView lblLast = (TextView) findViewById(last_id+ref);
         TextView lblNo = (TextView) findViewById(number_id+ref);
-        System.out.println("TMP IS: "+tmp.data.getFirstName());
+        // searching for player object based on information
         while (!(tmp.data.getFirstName().equals(lblFirst.getText().toString()) && tmp.data.getLastName().equals(lblLast.getText().toString()) && tmp.data.getPlayerNumber().equals(lblNo.getText().toString()))) {
             tmp = tmp.next;
         }
-        System.out.println("Chosen player is: "+tmp.data.getFirstName());
         tmp.isChecked = isChecked;
-        System.out.println(tmp.data.getFirstName()+".isChecked = "+String.valueOf(tmp.isChecked));
 
     }
 }

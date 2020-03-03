@@ -16,9 +16,9 @@ import com.example.finaldraft.model.Player;
 import org.w3c.dom.Text;
 
 public class GameActivity extends StartingWindow {
-    public static final int REQUEST_CODE_GETMESSAGE_PITCH = 6;
-    public static final int REQUEST_CODE_SUBPLAYER = 19;
-    public static final int REQUEST_CODE_RUNNER = 99;
+    public static final int REQUEST_CODE_GETMESSAGE_PITCH = 6; //Opening Pitch Activity
+    public static final int REQUEST_CODE_SUBPLAYER = 19;  //Opening SubPlayer Activity
+    public static final int REQUEST_CODE_RUNNER = 99;  //Opening Runner Activity
 
     // Fielding Buttons
     Button btnPitcher;
@@ -48,8 +48,10 @@ public class GameActivity extends StartingWindow {
     TextView lblAtBat;
     TextView lblScores;
 
+    //Whether home or away
     boolean isHome;
 
+    //Game Information
     int strikes;
     int balls;
     int inning;
@@ -57,12 +59,14 @@ public class GameActivity extends StartingWindow {
     int points =0;
     int opoints =0;
 
+    //Batter and Runner Nodes
     private BatterNode batter = new BatterNode();
     private BatterNode fbRunner = new BatterNode();
     private BatterNode sbRunner = new BatterNode();
     private BatterNode tbRunner = new BatterNode();
     private BatterNode hbRunner = new BatterNode();
 
+   //Fielder Nodes
     private PlayerNode pitcher;
     private PlayerNode catcher;
     private PlayerNode firstBase;
@@ -73,33 +77,41 @@ public class GameActivity extends StartingWindow {
     private PlayerNode centerField;
     private PlayerNode rightField;
 
+
     String[] positions = {"P","C","FB","SB","TB","SS","LF","CF","RF"};
     PlayerNode[] positionNodes = {pitcher,catcher,firstBase,secondBase,thirdBase,shortStop,leftField,centerField,rightField};
     Button[] positionButtons = new Button[9];
 
-    private PlayerNode opponent;
+
+    private PlayerNode opponent; //Head of linked list of opponent nodes
+
+    //Pointers for knowing which batter is batting and on deck
     static private PlayerNode atBat;
     static private PlayerNode oatBat;
-    public PlayerNode getOpponent() {
-        return opponent;
-    }
 
+    //Pointers for Game stack data structure
     Game front;
     Game base;
 
+    //Encapsulated fields for opponent linked list
+    public PlayerNode getOpponent() {
+        return opponent;
+    }
     public void setOpponent(PlayerNode opponent) {
         this.opponent = opponent;
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gameactivity_layout);
-        printRoster("Start of gameactivity");
+
+        //Get result from starting window
         boolean[] result = getIntent().getExtras().getBooleanArray("start");
-        isHome = result[0];
+        isHome = result[0]; //true = home, false = away
 
 
-        //views
+        //fielder button views
         btnPitcher = (Button) findViewById(R.id.btnPitcher);positionButtons[0] = btnPitcher;
         btnCatcher = (Button) findViewById(R.id.btnCatcher);positionButtons[1] = btnCatcher;
         btnFirstBase = (Button) findViewById(R.id.btnFirstBase);positionButtons[2] = btnFirstBase;
@@ -110,19 +122,24 @@ public class GameActivity extends StartingWindow {
         btnCenterField = (Button) findViewById(R.id.btnCenterField);positionButtons[7] = btnCenterField;
         btnRightField = (Button) findViewById(R.id.btnRightField);positionButtons[8] = btnRightField;
 
+        //UT button views
         btnPitch = (Button) findViewById(R.id.btnPitch);
         btnUndo = (Button) findViewById(R.id.btnUndo);
         btnStats = (Button) findViewById(R.id.btnStats);
         btnViewTeam = (Button) findViewById(R.id.btnViewTeam);
 
+        //game information views
         lblGameInfo = (TextView) findViewById(R.id.lblGameInfo);
         lblAtBat = (TextView) findViewById(R.id.lblAtBat);
         lblScores = (TextView) findViewById(R.id.lblScores);
 
+        //batter/ runner button views
         btnFirstRunner = (Button) findViewById(R.id.btnFirstRunner);
         btnSecondRunner = (Button) findViewById(R.id.btnSecondRunner);
         btnThirdRunner = (Button) findViewById(R.id.btnThirdRunner);
         btnBatter = (Button) findViewById(R.id.btnBatter);
+
+        //Setting instance variables of batterNodes
         batter.next = fbRunner;
         batter.order = 0;
         batter.btn = btnBatter;
@@ -141,7 +158,7 @@ public class GameActivity extends StartingWindow {
         btnPitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //printLineUp();
+                //Open pitch window with the intent of receiving data
                 Intent i = new Intent(getApplicationContext(),Pitch.class);
                 startActivityForResult(i,REQUEST_CODE_GETMESSAGE_PITCH);
             }
@@ -149,10 +166,11 @@ public class GameActivity extends StartingWindow {
         btnUndo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pop();
+                pop(); //pop game object from stack data structure
+
+                //display message on screen
                 Toast toast=Toast.makeText(getApplicationContext(),"Undone",Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
-
                 TextView textView = (TextView) toast.getView().findViewById(android.R.id.message);
                 textView.setTextColor(Color.BLACK);
                 textView.setTextSize(20);
@@ -162,6 +180,7 @@ public class GameActivity extends StartingWindow {
         btnStats.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Open statistics window
                 Intent i = new Intent(getApplicationContext(),Stats.class);
                 startActivity(i);
             }
@@ -169,67 +188,58 @@ public class GameActivity extends StartingWindow {
         btnViewTeam.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Open Roster window
                 Intent i = new Intent(getApplicationContext(),Roster.class);
                 startActivity(i);
             }
         });
 
+        //event listener for clicking on fielder buttons
         btnPitcher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 substituteActivity(pitcher);
             }
         });
-
         btnCatcher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 substituteActivity(catcher);
             }
         });
-
         btnFirstBase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 substituteActivity(firstBase);
             }
         });
-
         btnSecondBase.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                substituteActivity(secondBase);
+            public void onClick(View v) { substituteActivity(secondBase);
             }
         });
-
         btnThirdBase.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 substituteActivity(thirdBase);
             }
         });
-
         btnShortStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 substituteActivity(shortStop);
             }
         });
-
         btnRightField.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                substituteActivity(rightField);
+            public void onClick(View v) { substituteActivity(rightField);
             }
         });
-
         btnCenterField.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                substituteActivity(centerField);
+            public void onClick(View v) { substituteActivity(centerField);
             }
         });
-
         btnLeftField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -237,7 +247,7 @@ public class GameActivity extends StartingWindow {
             }
         });
 
-
+        //event listener for clicking on runner buttons
         btnFirstRunner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -261,26 +271,25 @@ public class GameActivity extends StartingWindow {
                     openRunner(tbRunner);
                 }
                 updateGameInfo();
-
             }
         });
 
-        //start
-        createOpponent();
-        atBat = getStarter();
-        oatBat = getOpponent();
-        updateGame();
-        updateGameInfo();
-        printRoster("GameActivity");
-        printLineUp("GameActivity");
-        push();
-        loadBattingButtons();
+        //Starting the game
+        createOpponent(); //create opponent linked list
+        updateGame(); //start team or opponent as batting depending on isHome
+        updateGameInfo(); //Updating game info labels
+        push(); //Add new game object to stack data structure
+        loadBattingButtons(); //changing text on batter/ runner buttons to
+                              //he name of the player object they point at
 
 
     }
 
     protected void openRunner(BatterNode runner){
+        //opening runner activity with the intent of receiving data
         Intent i = new Intent(getApplicationContext(), Runner.class);
+
+        //Passing the fn, ln, and pn of the runner to next activity
         Bundle bundle = new Bundle();
         String[] stuff = new String[4];
         stuff[0] = runner.data.data.getFirstName();
@@ -289,16 +298,19 @@ public class GameActivity extends StartingWindow {
         stuff[3] = String.valueOf(runner.order);
         bundle.putStringArray("Runner",stuff);
         i.putExtras(bundle);
+
         startActivityForResult(i, REQUEST_CODE_RUNNER);
     }
 
-    private void push(){
+    /////////////////////STACK DATA STRUCTURE START///////////////////////
+
+    private void push(){ //adding a new game object on top of the stack
         Game game = newGame();
-        if(front == null){
+        if(front == null){ //if the stack is empty
             front = game;
             base = game;
         }
-        else{
+        else{   //if the stack has objects already
             if(isEmpty()){
                 base.next = game;
                 game.back = base;
@@ -310,36 +322,32 @@ public class GameActivity extends StartingWindow {
 
     }
 
-    private void pop(){
-        Game g;
-        if (!isEmpty()){
+    private void pop(){ //returning the game object on top of the stack
+        Game g; //new pointer
+        if (!isEmpty()){ //if there are still game objects under g
             g = front;
             front = front.back;
-        }else{
+        }else{  //if g is the bottom of the stack
             g = front;
         }
-        setGame(g);
+        setGame(g); //setting g as the current game on the players screen
     }
 
     private void setGame(Game g){
-        //Lineup
+        //Setting g.lineup attribute to current lineup
         PlayerNode tmp = g.LineUp[0];
         for (int i =0; i< 9;i++){
             if (i == 0){
                 tmp = g.LineUp[i];
-                //tmp.data = g.Players[i];
                 setStarter(tmp);
                 tmp = getStarter();
             }else{
                 PlayerNode newPlayer = g.LineUp[i];
-                //newPlayer.data = g.Players[i];
                 tmp.next = newPlayer;
                 tmp = tmp.next;
             }
         }
-        System.out.println("THIS IS IN SETGAME: "+getStarter().data.getFirstName());
-
-        //Roster
+        //Setting g.roster attribute to current roster
         RosterNode rosterTmp = g.roster[0];
         for (int i =0; i<g.roster.length;i++){
             if (i==0){
@@ -354,7 +362,7 @@ public class GameActivity extends StartingWindow {
                 rosterTmp = rosterTmp.next;
             }
         }
-
+        //setting stats of temporary players in game object to current stats
         RosterNode tmpRoster= getRoster();
         for (int i =0; i<g.stats.length;i++){
             Player tmpPlayer = tmpRoster.data;
@@ -382,9 +390,7 @@ public class GameActivity extends StartingWindow {
             getRealm().commitTransaction();
             tmpRoster = tmpRoster.next;
         }
-
-
-        //Batters/RUnners
+        //Batters/Runners
         isHome = g.isHome;
         PlayerNode tmp1;
         if (isHome){
@@ -443,7 +449,7 @@ public class GameActivity extends StartingWindow {
             tbRunner.data = null;
         }
 
-        //Game info
+        //Setting game instance variables to current game information
         strikes = g.strikes;
         balls = g.balls;
         inning = g.inning;
@@ -503,9 +509,6 @@ public class GameActivity extends StartingWindow {
 
         }
         game.stats = stats;
-
-
-
         //game.Players = players;
         game.strikes = strikes;
         game.outs = outs;
@@ -537,6 +540,7 @@ public class GameActivity extends StartingWindow {
     }
 
     private int getInt(PlayerNode playerNode){
+        //Getting the index of the passed plaernode
         System.out.println("Running GetInt");
         PlayerNode tmp;
         if (playerNode.data.getFirstName().equals("Opponent")){
@@ -554,6 +558,7 @@ public class GameActivity extends StartingWindow {
     }
 
     private int getoInt(PlayerNode playerNode){
+        //getting the index of a player on deck
         PlayerNode tmp = getOpponent();
         int count = 0;
         while (!(tmp.data.getFirstName().equals(playerNode.data.getFirstName())&&tmp.data.getLastName().equals(playerNode.data.getLastName())&&tmp.data.getPlayerNumber().equals(playerNode.data.getPlayerNumber()))){
@@ -563,8 +568,11 @@ public class GameActivity extends StartingWindow {
         return count;
     }
 
+    /////////////////////STACK DATA STRUCTURE END///////////////////////
+
     private void substituteActivity(PlayerNode player){
         if (!player.data.getFirstName().equals("Opponent")) {
+            //Opening window to sub players between positions
             Intent i = new Intent(getApplicationContext(), SubPlayer.class);
             Bundle bundle = new Bundle();
             bundle.putStringArray("Position", new String[]{player.data.getFirstName(), player.data.getLastName(), player.position});
@@ -575,6 +583,7 @@ public class GameActivity extends StartingWindow {
 
 
     private void updateGame(){
+        // For setting your team or opponent team to fielding or batting
         if (isHome){
             loadFieldingPosition(getOpponent());
             loadBattingPosition(atBat);
@@ -585,8 +594,9 @@ public class GameActivity extends StartingWindow {
     }
 
     private void loadFieldingPosition(PlayerNode tmpHead){
+        // for loading players into their respective fielding positions
         PlayerNode tmp = tmpHead;
-        for (int i = 0; i < positions.length;i++){
+        for (int i = 0; i < positions.length;i++){ //For checking the first playerNode in linked list
             if(tmp.position!=null) {
                 if (tmp.position.equals(positions[i])) {
                     positionNodes[i] = tmp;
@@ -595,7 +605,7 @@ public class GameActivity extends StartingWindow {
             }else{
             }
         }
-        while (tmp.next != null){
+        while (tmp.next != null){ //For checking subsequent playerNodes in linked list
             for (int i = 0; i < positions.length;i++){
                 if(tmp.next.position!=null) {
                     if (tmp.next.position.equals(positions[i])) {
@@ -606,12 +616,13 @@ public class GameActivity extends StartingWindow {
             tmp = tmp.next;
         }
         updateNodes(positionNodes);
-        for (int i = 0; i < positionButtons.length;i++){
+        for (int i = 0; i < positionButtons.length;i++){ //updating the text of the buttons
             positionButtons[i].setText(positionNodes[i].data.getFirstName().toString()+" "+positionNodes[i].data.getLastName().charAt(0));
         }
     }
 
     protected void updateNodes(PlayerNode[] tmppositionNodes){
+        // setting fielding nodes to players
         pitcher = tmppositionNodes[0];
         catcher = tmppositionNodes[1];
         firstBase = tmppositionNodes[2];
@@ -624,6 +635,7 @@ public class GameActivity extends StartingWindow {
     }
 
     private void loadBattingPosition(PlayerNode tmp){
+        // setting batting node to a player
         batter.data = tmp;
         getRealm().beginTransaction();
         batter.data.data.addAB();
@@ -632,6 +644,7 @@ public class GameActivity extends StartingWindow {
     }
 
     protected void updateGameInfo(){
+        // for displaying the game information
         lblGameInfo.setText("I:"+getInning(inning)+" B:"+balls+" S:"+strikes+" O:"+outs);
         lblAtBat.setText("At Bat: "+batter.data.data.getFirstName()+" "+batter.data.data.getLastName());
         lblScores.setText("Bearcats: "+points+" Opponent: "+opoints);
@@ -639,6 +652,7 @@ public class GameActivity extends StartingWindow {
     }
 
     protected void checkGameInfo(){
+        // checking events regarding game information
         boolean first = true;
         if (balls == 4){
             balls = 0;
@@ -674,6 +688,7 @@ public class GameActivity extends StartingWindow {
     }
 
     private void swapSides(){
+        // swapping sides
         if (isHome){
             isHome = false;
         }else{
@@ -683,6 +698,7 @@ public class GameActivity extends StartingWindow {
     }
 
     private String getInning(int inning){
+        // converting integer inning to be displayed as relevant text
         String s = "";
         if (inning%2 == 1){
             s+= "^";
@@ -694,6 +710,8 @@ public class GameActivity extends StartingWindow {
     }
 
     private void createOpponent(){
+
+        // creating a linked list of temporary opponents
         for (int i = 0; i <9;i++){
             PlayerNode newPlayer = new PlayerNode();
             Player player = new Player();
@@ -715,6 +733,7 @@ public class GameActivity extends StartingWindow {
         }
     }
 
+    /////////////////////RECEIVING DATA FROM ANOTHER ACTIVITY///////////////////
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -722,12 +741,14 @@ public class GameActivity extends StartingWindow {
         System.out.println("OATBAT IS: "+oatBat.data.getFirstName()+" "+oatBat.data.getLastName());
         switch (requestCode){
             case (REQUEST_CODE_GETMESSAGE_PITCH):
+                // returning from the pitch activity
                 if(resultCode == Activity.RESULT_OK) {
                     push();
-                    String[] result = Pitch.getResultKeyMessage(data);
+                    String[] result = Pitch.getResultKeyMessage(data); //receiving data from the activity
                     getRealm().beginTransaction();
                     pitcher.data.addPIT();
                     getRealm().commitTransaction();
+                    // switch case for updating statistics and game events based on input
                     switch (result[1]) {
                         case ("Ground Ball"):
                             getRealm().beginTransaction();
@@ -869,6 +890,7 @@ public class GameActivity extends StartingWindow {
                 }
                 break;
             case (REQUEST_CODE_SUBPLAYER):
+                //  returning from the sub player activity
                 if (resultCode == Activity.RESULT_OK){
                     push();
                     String[] result1 = SubPlayer.getResultKeyMessage(data);
@@ -877,10 +899,12 @@ public class GameActivity extends StartingWindow {
                 }
                 break;
             case (REQUEST_CODE_RUNNER):
+                // returning from runner activity
                 if (resultCode == Activity.RESULT_OK){
                     push();
                     String[] result = Runner.getResultKeyMessage(data);
                     BatterNode tmp = new BatterNode();
+                    // switch case for which position runner is
                     switch (result[1]){
                         case ("1"):
                             tmp = fbRunner;
@@ -892,6 +916,7 @@ public class GameActivity extends StartingWindow {
                             tmp = tbRunner;
                             break;
                     }
+                    // switch case for result of the runner
                     switch (result[0]){
                         case ("Out"):
                             outs++;
@@ -918,7 +943,7 @@ public class GameActivity extends StartingWindow {
                             }
                             tmp.btn.setText("--");
                             break;
-                        case ("SOut"):
+                        case ("SOut"): // stole but out
                             getRealm().beginTransaction();
                             tmp.data.data.addSA();
                             getRealm().commitTransaction();
@@ -936,20 +961,29 @@ public class GameActivity extends StartingWindow {
         }
     }
 
+    /////////////////////RECEIVING DATA FROM ANOTHER ACTIVITY///////////////////
+
     private void switchPlayer(String fn, String ln, String no, String ofn, String oln, String ono,String isRoster){
-        System.out.println(fn+" "+ln+" "+no+" "+ofn+" "+oln+" "+ono+" "+isRoster);
+        // true = from roster
+        // false = from another fielding position
+        // fn ln no = information of player to be swapped in
+        // ofn oln ono = information of player to be swapped out
         switch (isRoster){
             case ("true"):
+                //finding players based on their name
                 RosterNode rosterNode = findRosterNode(ofn,oln);
                 RosterNode switchedRosterNode = findRosterNode(fn,ln);
                 PlayerNode playerNode = findPlayerNode(fn,ln);
+                // switching players
                 rosterNode.isChecked = true;
                 switchedRosterNode.isChecked = false;
                 playerNode.data = rosterNode.data;
                 break;
             case ("false"):
+                //finding players based on their name
                 PlayerNode playerNode1 = findPlayerNode(fn,ln);
                 PlayerNode playerNode2 = findPlayerNode(ofn,oln);
+                // switching players
                 Player tmp = playerNode1.data;
                 playerNode1.data = playerNode2.data;
                 playerNode2.data = tmp;
@@ -959,6 +993,7 @@ public class GameActivity extends StartingWindow {
     }
 
     private RosterNode findRosterNode(String fn, String ln){
+        // method for returning roster node based on name
         RosterNode tmp = getRoster();
         while (!(tmp.data.getFirstName().equals(fn)&&tmp.data.getLastName().equals(ln))){
             tmp = tmp.next;
@@ -967,6 +1002,7 @@ public class GameActivity extends StartingWindow {
     }
 
     private PlayerNode findPlayerNode(String fn, String ln){
+        // method for returning player object based on name
         PlayerNode tmp = getStarter();
         while (!(tmp.data.getFirstName().equals(fn)&&tmp.data.getLastName().equals(ln))){
             tmp = tmp.next;
@@ -975,6 +1011,7 @@ public class GameActivity extends StartingWindow {
     }
 
     private void loadBattingButtons(){
+        // setting the text of a button based on the player object it references
         batter.btn.setText(batter.data.data.getFirstName()+" "+batter.data.data.getLastName().charAt(0));
         if (fbRunner.data != null){
             fbRunner.btn.setText(fbRunner.data.data.getFirstName()+" "+fbRunner.data.data.getLastName().charAt(0));
@@ -995,8 +1032,7 @@ public class GameActivity extends StartingWindow {
 
 
     protected void moveBatter(int n){
-        //printBatters();
-
+        //For advancing runners
         for (int i =0; i< n;i++) {
             if (tbRunner.data != null) {
                 if (!(tbRunner.data.data.getFirstName().equals("Opponent"))) {
@@ -1030,7 +1066,7 @@ public class GameActivity extends StartingWindow {
                 sbRunner.data = null;
                 sbRunner.btn.setText("--");
             }
-            if (i<1) {
+            if (i<1) { //changing the color of the button
                 fbRunner.data = batter.data;
                 fbRunner.btn.setText(fbRunner.data.data.getFirstName() + " " + fbRunner.data.data.getLastName().charAt(0));
                 fbRunner.btn.setBackgroundColor(Color.GREEN);
@@ -1041,6 +1077,7 @@ public class GameActivity extends StartingWindow {
     }
 
     private void shiftBatters(){
+        // changing batter to the player on deck
         if (batter.data.next != null) {
             batter.data = batter.data.next;
         }else{

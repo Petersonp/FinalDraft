@@ -9,9 +9,12 @@ import android.view.View;
 import android.widget.Button;
 
 public class BallInPlay extends StartingWindow {
+
+    // constants
     public static final int REQUEST_CODE_GETMESSAGE_BALLINPLAY2 = 2;
     public static final String RESULT_KEY_MESSAGE = "com.example.a12fixedfirstdraft.BallInPlay - Return Message";
     DisplayMetrics displayMetrics;
+    // instance variables
     Button btnBack;
     Button btnGroundBall;
     Button btnBunt;
@@ -34,6 +37,7 @@ public class BallInPlay extends StartingWindow {
         btnLineDrive = (Button) findViewById(R.id.btnLineDrive);
         btnPopFly = (Button) findViewById(R.id.btnPopFly);
 
+        // evenet listeners
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,6 +82,7 @@ public class BallInPlay extends StartingWindow {
 
 
     private void nextPopUp(String title){
+        // opening next activity while passing title variable
         Intent i = new Intent(getApplicationContext(),BallInPlay2.class);
         Bundle bundle = new Bundle();
         bundle.putString("Title",title);
@@ -88,23 +93,16 @@ public class BallInPlay extends StartingWindow {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        System.out.println("OnActivityResult at BallInPlay --------------------");
-        System.out.println("RequestCode at BallInPlay is: "+requestCode+" --------------------");
         switch (requestCode){
-
             case REQUEST_CODE_GETMESSAGE_BALLINPLAY2:
-                System.out.println("Checking case at BallInPlay --------------------");
+                // receiving data from the other activity
                 if (resultCode == Activity.RESULT_OK){
-                    System.out.println("REQUEST_CODE_GETMESSAGE at BallInPlay --------------------");
                     String[] message = BallInPlay2.getResultKeyMessage(data);
-                    System.out.println(message+" Message at BallInPlay --------------------");
+                    // returning data to initial pitch window
                     Intent intent = new Intent();
                     intent.putExtra(RESULT_KEY_MESSAGE,message);
                     setResult(Activity.RESULT_OK,intent);
-                    System.out.println("Prefinish --------------------");
                     finish();
-                }else{
-                    System.out.println("Else in BallInPlay");
                 }
         }
     }
